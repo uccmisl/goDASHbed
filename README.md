@@ -6,8 +6,9 @@ We kindly ask that should you mention goDASH or goDASHbed, or use our code, in y
 
 D. Raca, M. Manifacier, and J.J. Quinlan.  goDASH - GO accelerated HAS framework for rapid prototyping. 12th International Conference on Quality of Multimedia Experience (QoMEX), Athlone, Ireland. 26th to 28th May, 2020 [CORA](http://hdl.handle.net/10468/9845 "CORA") (To Appear)
 
-GoDASHbed is a testbed framework for goDASH
+## General Description
 
+GoDASHbed is a testbed framework for goDASH
 
 download dash content to <content_folder>, using "get_your_movies.sh"
 sudo mv <content_folder> /var/www/html
