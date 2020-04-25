@@ -1,0 +1,28 @@
+# our https caddy server
+www.goDASHbed.org:443 {
+  # needed for proxy to find html content for external IP
+  proxy ./ https://10.0.0.1:443 {
+    max_fails 1
+     # i think this ignores the ssl errors
+     insecure_skip_verify
+  }
+  # these are our certs
+ tls <godash folder location>/goDash/DashApp/src/goDASH/http/certs/cert.pem <godash folder location>/goDash/DashApp/src/goDASH/http/certs/key.pem
+  gzip
+ # needed for location of content to offer
+  root /var/www/html
+  log access.log
+}
+
+http://www.goDASHbed.org {
+  # needed for proxy to find html content for external IP
+  proxy ./ http://10.0.0.1 {
+     max_fails 1
+     # i think this ignores the ssl errors
+     insecure_skip_verify
+  }
+  gzip
+  # needed for location of content to offer
+  root /var/www/html
+  log access.log
+}
