@@ -7,7 +7,7 @@ www.goDASHbed.org:443 {
      insecure_skip_verify
   }
   # these are our certs
- tls <godash folder location>/goDash/DashApp/src/goDASH/http/certs/cert.pem <godash folder location>/goDash/DashApp/src/goDASH/http/certs/key.pem
+ tls /home/misl/goDASHbed/goDash/DashApp/src/goDASH/http/certs/cert.pem /home/misl/goDASHbed/goDash/DashApp/src/goDASH/http/certs/key.pem
   gzip
  # needed for location of content to offer
   root /var/www/html
