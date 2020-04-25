@@ -14,6 +14,6 @@
         "hls" : "off",
         "expRatio" : 0.2,
         "quic" : "off",
-        "url" : "[http://www.goDASHbed.org/ed_10min/DASH_Files/VOD/ed_enc_10min_x264_dash.mpd]",
+        "url" : "[http://www.goDASHbed.org/4K_dataset/4_sec/x264/bbb/DASH_Files/full/bbb_enc_x264_dash.mpd]",
         "useTestbed" : "on"
 }
