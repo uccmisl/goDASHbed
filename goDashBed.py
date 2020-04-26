@@ -65,23 +65,22 @@ parser.add_argument('--bw-net', '-b',
                     action="store",
                     help="Bandwidth of bottleneck link",
                     required=True)
+
 parser.add_argument('--delay',
                     dest="delay",
                     type=float,
                     help="Delay in milliseconds of bottleneck link",
                     default=40)
 
-
-parser.add_argument('--cong',
-                    dest="cong",
-                    help="Congestion control algorithm to use",
-                    default="reno")
+# parser.add_argument('--cong',
+#                     dest="cong",
+#                     help="Congestion control algorithm to use",
+#                     default="reno")
 
 parser.add_argument('--numruns',
                     dest="numruns",
                     help="Numbe of times experiment needs to be repeated",
                     default=1)
-
 
 parser.add_argument('--voipclients',
                     dest="voipclients",
