@@ -8,16 +8,16 @@ D. Raca, M. Manifacier, and J.J. Quinlan.  goDASH - GO accelerated HAS framework
 
 ## General Description
 
-GoDASHbed is a highly customizable framework for realistic large scale experimentation with two different types of Supported traffic:
+GoDASHbed is a highly customizable framework for realistic large scale experimentation with two different types of supported traffic:
 
     -- Video: HTTP Adaptive Streaming traffic with support for two transportation modes TCP and QUIC
     -- VoIP: Realistic VoIP traffic generation (through D-ITG traffic generator[1])
 
 
 Requirements:
- - Mininet [mininet](http://mininet.org/)
- - goDash (TODO: add link)
- - D-ITG (www.grid.unina.it/software/ITG//download.php)
+ - [Mininet](http://mininet.org/)
+ - [goDASH](https://github.com/uccmisl/goDASH.git)
+ - [D-ITG](www.grid.unina.it/software/ITG//download.php)
 
 # Examples to launch the app :
 ```
