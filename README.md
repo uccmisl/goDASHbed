@@ -22,8 +22,7 @@ Requirements:
 --------------------------------------------------------
 
 ## Install Steps
-The easiest way to install goDASHbed is to use the install script available at
-[MISL](http://cs1dev.ucc.ie/misl/goDASH/)
+The easiest way to install goDASHbed is to use the install script available at the UCC Mobile and Internet System Lab [MISL](http://cs1dev.ucc.ie/misl/goDASH/)
 
 After goDASHbed has been installed, follow these steps for all required dependencies
 
