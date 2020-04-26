@@ -72,5 +72,6 @@ TODO
 
 ## Examples to launch the app :
 ```
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug="off" --numruns 1 --tm "tcp"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 
+--voipclients 1 --debug="off" --numruns 1 --tm "tcp"
 ```
