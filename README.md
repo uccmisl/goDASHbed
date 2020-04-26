@@ -19,10 +19,6 @@ Requirements:
  - [goDASH](https://github.com/uccmisl/goDASH.git)
  - [D-ITG](www.grid.unina.it/software/ITG//download.php)
 
-# Examples to launch the app :
-```
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug="off" --numruns 1 --tm "tcp"
-```
 --------------------------------------------------------
 
 ## Install Steps
@@ -61,8 +57,18 @@ tls <godash folder location>/goDash/DashApp/src/goDASH/http/certs/cert.pem <goda
 add the folder location that you downloaded goDASH to
 Easiest way to find this location, is to open the folder that you added goDASH to, then open a terminal, type "pwd" and the reply is the folder location.  Add this output text into the "Caddyfile" replacing "<godash folder location>"
 
+--------------------------------------------------------
+
 # Print help about parameters:
 
 >./goDASHbed -help
 
 Flags for goDASH:
+
+
+--------------------------------------------------------
+
+## Examples to launch the app :
+```
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug="off" --numruns 1 --tm "tcp"
+```
