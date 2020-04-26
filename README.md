@@ -58,10 +58,11 @@ Easiest way to find this location, is to open the folder that you added goDASH t
 
 --------------------------------------------------------
 
-# Print help about parameters:
+## Print help about parameters:
 
->./goDASHbed -help
-
+```
+./goDASHbed -help
+```
 Flags for goDASH:
 
 
