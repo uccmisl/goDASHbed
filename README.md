@@ -8,11 +8,10 @@ D. Raca, M. Manifacier, and J.J. Quinlan.  goDASH - GO accelerated HAS framework
 
 ## General Description
 
-GoDASHbed is a highly customizable framework for realistic large scale experimentation with two different types of traffic
+GoDASHbed is a highly customizable framework for realistic large scale experimentation with two different types of Supported traffic:
 
-          - Supported traffic types:
-            -- Video: HTTP Adaptive Streaming traffic with support for two transportation modes TCP and QUIC
-            -- VoIP: Realistic VoIP traffic generation (through D-ITG traffic generator[1])
+    -- Video: HTTP Adaptive Streaming traffic with support for two transportation modes TCP and QUIC
+    -- VoIP: Realistic VoIP traffic generation (through D-ITG traffic generator[1])
 
 
 Requirements:
@@ -50,7 +49,7 @@ update the url lists in "urls/mpdURL.py" to reflect the content downloaded
 You may also need to update the "configure.json" file in goDASHbed/config, and change url to point to the content downloaded
 
 if using tcp with https - change http to https in the configure.json file
-if using quic - change http to https in the configure.json file
+if using QUIC - change http to https in the configure.json file
 
 to use tcp https in goDASHbed, you need to modify the following file:
 goDASHbed/caddy-config/TesbedTCP/Caddyfile
