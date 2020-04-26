@@ -20,6 +20,10 @@ Requirements:
  - goDash (TODO: add link)
  - D-ITG (www.grid.unina.it/software/ITG//download.php)
 
+# Examples to launch the app :
+```
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug="off" --numruns 1 --tm "tcp"
+```
 --------------------------------------------------------
 
 ## Install Steps
@@ -30,11 +34,11 @@ After goDASHbed has been installed, follow these steps for all required dependen
 
 download dash content to <content_folder>, using "get_your_movies.sh"
 sudo mv <content_folder> /var/www/html
-
+```
 sudo adduser $USER www-data
 sudo chown $USER:www-data -R /var/www
 sudo chmod u=rwX,g=srX,o=rX -R /var/www
-
+```
 update the url lists in "urls/mpdURL.py" to reflect the content downloaded
 /var/www/html/<folder> -> "http://www.goDASHbed.org/<folder>"
 
