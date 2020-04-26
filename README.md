@@ -8,7 +8,25 @@ D. Raca, M. Manifacier, and J.J. Quinlan.  goDASH - GO accelerated HAS framework
 
 ## General Description
 
-GoDASHbed is a testbed framework for goDASH
+GoDASHbed is a highly customizable framework for realistic large scale experimentation with two different types of traffic
+
+          - Supported traffic types:
+            -- Video: HTTP Adaptive Streaming traffic with support for two transportation modes TCP and QUIC
+            -- VoIP: Realistic VoIP traffic generation (through D-ITG traffic generator[1])
+
+
+Requirements:
+ - Mininet [mininet](http://mininet.org/)
+ - goDash (TODO: add link)
+ - D-ITG (www.grid.unina.it/software/ITG//download.php)
+
+--------------------------------------------------------
+
+## Install Steps
+The easiest way to install goDASHbed is to use the install script available at
+[MISL](http://cs1dev.ucc.ie/misl/goDASH/)
+
+After goDASHbed has been installed, follow these steps for all required dependencies
 
 download dash content to <content_folder>, using "get_your_movies.sh"
 sudo mv <content_folder> /var/www/html
@@ -33,3 +51,9 @@ tls <godash folder location>/goDash/DashApp/src/goDASH/http/certs/cert.pem <goda
 
 add the folder location that you downloaded goDASH to
 Easiest way to find this location, is to open the folder that you added goDASH to, then open a terminal, type "pwd" and the reply is the folder location.  Add this output text into the "Caddyfile" replacing "<godash folder location>"
+
+# Print help about parameters:
+
+>./goDASHbed -help
+
+Flags for goDASH:
