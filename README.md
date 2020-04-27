@@ -51,10 +51,10 @@ to use tcp https in goDASHbed, you need to modify the following file:
 
 on line 10, chage the following:
 ```
-tls <godash folder location>/goDash/DashApp/src/goDASH/http/certs/cert.pem <godash folder location>/goDash/DashApp/src/goDASH/http/certs/key.pem
+tls <godash folder location>/godash/http/certs/cert.pem <godash folder location>/godash/http/certs/key.pem
 ```
 add the folder location that you downloaded goDASH to.
-Easiest way to find this location, is to open the folder that you added `goDASH` to, then open a terminal, type `pwd` and the reply is the folder location.  Add this output text into the `Caddyfile` replacing `<godash folder location>` as shown above.
+Easiest way to find this location, is to open the folder that you added `godash` to, then open a terminal, type `pwd` and the reply is the folder location.  Add this output text into the `Caddyfile` replacing `<godash folder location>` as shown above.
 
 --------------------------------------------------------
 
