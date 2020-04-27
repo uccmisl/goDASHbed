@@ -187,6 +187,9 @@ def modify_dict(_dict, i, run, **params):
             _dict[k] = args.debug
         elif k == "streamDuration":
             _dict[k] = args.duration
+        elif k == "quic":
+            if args.transport_mode == "quic":
+                _dict[k] = "on"
         elif k == "url":
             value = randint(0, len(urls)-1)
             _dict[k] = urls[value]
@@ -485,22 +488,27 @@ def goDashBedNet():
             ip_address_sh = serverHost.cmdPrint(
                 "ifconfig %s-eth0 | grep inet | awk '{print $2}' | sed 's/addr://'" % serverHost.name).split()[0]
 
+            # stop the apache server
+            tt4 = serverHost.cmd("sudo systemctl stop apache2.service")
+
             if args.transport_mode == "quic":
                 print("Starting QUIC server")
                 #tt = serverHost.cmd("./caddy -host %s -port 8081 -quic -root ./ &"%ip_address_sh)
-                tt4 = serverHost.cmd("sudo systemctl stop apache2.service")
+                #tt4 = serverHost.cmd("sudo systemctl stop apache2.service")
                 #tt = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
                 #tt1 = serverHost.cmd("./caddy -conf ./caddy-config/Testbed/Caddyfile -quic &")
                 #tt1 = serverHost.cmd("./caddy -conf ./caddy-config/Caddyfile -quic &")
                 tt2 = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip example")
                 # tt1 = serverHost.cmd("./example -conf ./caddy-config/Caddyfile -quic &")
-                tt3 = serverHost.cmd(
+                tt = serverHost.cmd(
                     "./example '-bind=www.godashbed.org:443' '-www=/var/www/html' &")
             elif args.transport_mode == "tcp":
                 print("Starting TCP server")
+                tt2 = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
                 #tt = serverHost.cmd('./caddy -host %s -port 8080 -root /var/www/html &'%ip_address_sh)
                 tt = serverHost.cmd(
                     './caddy -conf ./caddy-config/TestbedTCP/Caddyfile &')
+            #print(tt)
             sleep(3)
             #print (tt)
             #pid_python = int(tt.split()[1])
@@ -556,7 +564,7 @@ def goDashBedNet():
                                 output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
             #start_iperf(net)
             print("sleeping")
-            #throttleLink(bw_a)
+            throttleLink(bw_a)
             os.system(
                 "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (1000, 1000))
             sleep(int(args.duration)+10)
@@ -566,7 +574,7 @@ def goDashBedNet():
             genstats_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run, current_folder)
             #sleep(5)
-            #CLI(net)
+            CLI(net)
 
             net.stop()
             Popen("pgrep -f caddy | xargs kill -9", shell=True).wait()
