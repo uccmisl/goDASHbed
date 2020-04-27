@@ -574,7 +574,7 @@ def goDashBedNet():
             genstats_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run, current_folder)
             #sleep(5)
-            CLI(net)
+            #CLI(net)
 
             net.stop()
             Popen("pgrep -f caddy | xargs kill -9", shell=True).wait()
