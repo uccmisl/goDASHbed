@@ -577,8 +577,11 @@ def goDashBedNet():
             #CLI(net)
 
             net.stop()
-            Popen("pgrep -f caddy | xargs kill -9", shell=True).wait()
-            Popen("pgrep -f godash | xargs kill -9", shell=True).wait()
+            if args.transport_mode == "tcp":
+                Popen("pgrep -f caddy | xargs kill -9", shell=True).wait()
+            if args.transport_mode == "quic":
+                Popen("pgrep -f example | xargs kill -9", shell=True).wait()
+            #Popen("pgrep -f godash | xargs kill -9", shell=True).wait()
             #Popen("killall -9 MP4Client", shell=True).wait()
 
 
