@@ -14,7 +14,7 @@ Highly customizable framework for realistic large scale experimentation with two
 
 Requirements:
  - Mininet (http://mininet.org/)
- - goDash (TODO: add link)
+ - goDash (https://github.com/uccmisl/goDASH.git)
  - D-ITG (www.grid.unina.it/software/ITG//download.php)
 
 
@@ -23,7 +23,7 @@ References:
 1. Alessio Botta, Alberto Dainotti, and Antonio Pescap;. 2012. A tool for the generation of realistic network workload for emerging networking scenarios. Comput. Netw. (October 2012)
 
 example call to goDashBed.py
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug="off" --numruns 1 --tm "tcp"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off"
 '''
 
 
@@ -143,10 +143,9 @@ log_folder_name = "/files"
 urls = full_url_list+main_url_list+live_url_list + \
     full_byte_range_url_list+main_byte_range_url_list
 
-# create a dictionary from the default config file
-
 
 def create_dict_from_json(config_file):
+    # create a dictionary from the default config file
     with open(config_file) as json_file:
         test_dict = json.load(json_file)
     return test_dict
@@ -182,18 +181,20 @@ def modify_dict(_dict, i, run, **params):
             _dict[k] = params["client_name"]
         elif k == "logFile":
             _dict[k] = str(str(v)[:8]+"_client"+str(i))
-        elif k == '"terminalPrint"':
+        elif k == "terminalPrint":
             _dict[k] = args.terminalPrint
-        elif k == '"debug"':
+        elif k == "debug":
             _dict[k] = args.debug
-        elif k == '"url"':
+        elif k == "streamDuration":
+            _dict[k] = args.duration
+        elif k == "url":
             value = randint(0, len(urls)-1)
             _dict[k] = urls[value]
         elif k == "getHeaders":
             if v != "off":
                 getHeaders = True
     fout = params["config_folder"]+params["client_config"]
-    print(params["config_folder"])
+    # print(params["config_folder"])
     with open(fout, 'w') as json_file:
         json.dump(_dict, json_file)
 
@@ -231,7 +232,6 @@ def modify_zero_thr2(bw_array):
                 bw_array[i][1] = bw_array[i][1] - sum_val
                 if bw_array[i][1] <= 1:
                     zero_array.append(bw_array[i][1])
-
     return bw_array
 
 
@@ -352,7 +352,6 @@ def start_video_clients(num_video, algorithm, buffer_level, server_ip, net, subf
         # - files
         log_folder = params["output_folder"] + "/R" + \
             str(run) + params["current_folder"]+log_folder_name+"/"+client_name
-        print(log_folder)
         # lets create the file output folder structure
         if not os.path.exists(log_folder):
             os.makedirs(log_folder)
@@ -363,17 +362,11 @@ def start_video_clients(num_video, algorithm, buffer_level, server_ip, net, subf
         # lets call each client from within its output folder
         temp_host.cmd("cd " + log_folder+"../")
 
-        cmd = params["cwd"]+"/../goDash/DashApp/src/goDASH/goDASH -config " + \
+        cmd = params["cwd"]+"/../goDASH/godash/godash --config " + \
             params["output_folder"]+"/R" + \
             str(run)+params["current_folder"]+config_folder_name+client_config
         print(cmd)
-        #CLI(net)
-        #temp_host.cmd("./dashc.exe play %s -adapt %s -initb 2 -maxbuf 30 -persist true -lastsegmindex 75 -logname %s -v 20 -turnlogon true -subfolder %s -r %d &"%(URL, algorithm, log_name, subf, run))
-        #temp_host.cmd("cd ../goDash/DashApp/src/goDASH")
-        #temp_host.cmd("./goDASH -config ../config/configure.json -maxBuffer 30 -initBuffer %d "%(buffer_level))
         temp_host.cmd(cmd + " &")
-        #temp_host.sendCmd("./goDASH -config ../config/configure.json")
-        #temp_host.sendCmd(cmd)
         sleep(1)
         print("Started: " + str(i))
 
@@ -386,10 +379,10 @@ def start_voip_clients(server_host, client_host, num, subfolder, run):
     server_host.popen("ITGSend voipclients -l sender_log_file1")
 
 
-def genstats_voip_clients(server_host, client_host, num, subfolder, run):
+def genstats_voip_clients(server_host, client_host, num, subfolder, run, time_stamp):
     input_file = "%s/recv_%d_log_R%d" % (subfolder, num, run)
     out_file = "%s/out_%d_log_R%d" % (subfolder, num, run)
-    summ_file = "%s/summ_%d_log_R%d" % (subfolder, num, run)
+    summ_file = "%s/%s_summ_%d_log_R%d" % (subfolder, time_stamp[1:], num, run)
     voip_s1 = client_host.cmd("ITGDec %s > %s" % (input_file, summ_file))
     voip_s1 = client_host.popen("rm %s" % (input_file))
 
@@ -436,22 +429,19 @@ class TwoSwitchTopo(Topo):
 def goDashBedNet():
     "Create network and run experiment"
 
-    print("preapring config files for goDASH")
+    print("preparing config files for goDASH")
     # lets read in the goDASH config file
     cwd = os.getcwd()
     config_direct = cwd + "/config"
     config_file = config_direct+"/configure.json"
     # lets read in the original config file and create a dictionary we can use
     _dict = create_dict(config_file)
-    print("How this dict looks alike: ")
+    # print("How this dict looks alike: ")
     test_dict = create_dict_from_json(config_file)
-    print(test_dict)
-    #
+    # print(test_dict)
     print("---- end dict ------")
     # lets create the log and config folder locations
     output_folder = cwd+output_folder_name
-    # create a folder based on date and time
-    current_folder = "/" + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
     print("starting mininet ....")
 
@@ -465,62 +455,65 @@ def goDashBedNet():
     total_num_hosts = int(args.videoclients) + num_voip + 1
     print("Total number of host : " + str(total_num_hosts))
 
-    # Create topology
-    topo = TwoSwitchTopo(total_num_hosts=total_num_hosts)
-    net = Mininet(controller=Controller, link=TCLink, topo=topo)
-
-    net.start()
-
-    # get voip client host - it is the last
-    print('h%d' % (total_num_hosts))
-    voip_host = net.getNodeByName('h%d' % (total_num_hosts))
-    # leaverage D-ITG capabilites
-    prepare_voip_clients(int(args.voipclients), voip_host,
-                         1000*int(args.duration))
-
-    # wait for 5 seconds
-    sleep(5)
-    dumpNodeConnections(net.hosts)
-
-    #print (pid_python)
-    serverHost = net.getNodeByName('h1')
-    ip_address_sh = serverHost.cmdPrint(
-        "ifconfig %s-eth0 | grep inet | awk '{print $2}' | sed 's/addr://'" % serverHost.name).split()[0]
-
-    if args.transport_mode == "quic":
-        print("Starting QUIC server")
-        #tt = serverHost.cmd("./caddy -host %s -port 8081 -quic -root ./ &"%ip_address_sh)
-        tt4 = serverHost.cmd("sudo systemctl stop apache2.service")
-        #tt = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
-        #tt1 = serverHost.cmd("./caddy -conf ./caddy-config/Testbed/Caddyfile -quic &")
-        #tt1 = serverHost.cmd("./caddy -conf ./caddy-config/Caddyfile -quic &")
-        tt2 = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip example")
-        # tt1 = serverHost.cmd("./example -conf ./caddy-config/Caddyfile -quic &")
-        tt3 = serverHost.cmd(
-            "./example '-bind=www.godashbed.org:443' '-www=/var/www/html' &")
-    elif args.transport_mode == "tcp":
-        print("Starting TCP server")
-        #tt = serverHost.cmd('./caddy -host %s -port 8080 -root /var/www/html &'%ip_address_sh)
-        tt = serverHost.cmd(
-            './caddy -conf ./caddy-config/TestbedTCP/Caddyfile &')
-    sleep(3)
-    #print (tt)
-    #pid_python = int(tt.split()[1])
-    # get ip address of server host
-    s1 = net.getNodeByName('s1')
-    s0 = net.getNodeByName('s0')
-    print(s1.intfList())
-    print(s0.intfList()[2:])
-    subfolder = args.scenarioname + "_R" + \
-        str(args.numruns) + '/godash_' + "algname" + \
-        '_' + str(total_num_hosts).zfill(3)
-    os.system("mkdir -p %s" % subfolder)
-
-    trace_files = ["traces/"
-                   + f for f in listdir("traces/") if isfile(join("traces/", f))]
-
+    # for each run
     for run in range(1, 1+int(args.numruns)):
+
+        trace_files = ["traces/"
+                       + f for f in listdir("traces/") if isfile(join("traces/", f))]
+        # for each trace file
         for trace_file in trace_files:
+
+            # Create topology
+            topo = TwoSwitchTopo(total_num_hosts=total_num_hosts)
+            net = Mininet(controller=Controller, link=TCLink, topo=topo)
+
+            net.start()
+
+            # get voip client host - it is the last
+            print('h%d' % (total_num_hosts))
+            voip_host = net.getNodeByName('h%d' % (total_num_hosts))
+            # leaverage D-ITG capabilites
+            prepare_voip_clients(int(args.voipclients), voip_host,
+                                 1000*int(args.duration))
+
+            # wait for 5 seconds
+            sleep(5)
+            dumpNodeConnections(net.hosts)
+
+            #print (pid_python)
+            serverHost = net.getNodeByName('h1')
+            ip_address_sh = serverHost.cmdPrint(
+                "ifconfig %s-eth0 | grep inet | awk '{print $2}' | sed 's/addr://'" % serverHost.name).split()[0]
+
+            if args.transport_mode == "quic":
+                print("Starting QUIC server")
+                #tt = serverHost.cmd("./caddy -host %s -port 8081 -quic -root ./ &"%ip_address_sh)
+                tt4 = serverHost.cmd("sudo systemctl stop apache2.service")
+                #tt = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
+                #tt1 = serverHost.cmd("./caddy -conf ./caddy-config/Testbed/Caddyfile -quic &")
+                #tt1 = serverHost.cmd("./caddy -conf ./caddy-config/Caddyfile -quic &")
+                tt2 = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip example")
+                # tt1 = serverHost.cmd("./example -conf ./caddy-config/Caddyfile -quic &")
+                tt3 = serverHost.cmd(
+                    "./example '-bind=www.godashbed.org:443' '-www=/var/www/html' &")
+            elif args.transport_mode == "tcp":
+                print("Starting TCP server")
+                #tt = serverHost.cmd('./caddy -host %s -port 8080 -root /var/www/html &'%ip_address_sh)
+                tt = serverHost.cmd(
+                    './caddy -conf ./caddy-config/TestbedTCP/Caddyfile &')
+            sleep(3)
+            #print (tt)
+            #pid_python = int(tt.split()[1])
+            # get ip address of server host
+            s1 = net.getNodeByName('s1')
+            s0 = net.getNodeByName('s0')
+            print(s1.intfList())
+            print(s0.intfList()[2:])
+            subfolder = args.scenarioname + "_R" + \
+                str(args.numruns) + '/godash_' + test_dict['adapt'] + \
+                '_' + str(total_num_hosts).zfill(3)
+            os.system("mkdir -p %s" % subfolder)
+
             print("Load bw values from trace: " + trace_file)
             if ".csv" in trace_file:
                 bw_a = readCsvThr(trace_file)
@@ -539,21 +532,27 @@ def goDashBedNet():
                     intf.name, args.delay), shell=True, stdout=subprocess.PIPE).stdout
             sleep(5)
 
+
+            # create a folder based on date and time for each run
+            current_folder = "/" + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+
             # - config
             config_folder = output_folder+"/R" + \
                 str(run)+current_folder+config_folder_name
-            print(output_folder)
+            print(config_folder)
 
             # lets create the output folder structure
             if not os.path.exists(config_folder):
                 os.makedirs(config_folder)
+
+            #continue
 
             # start voip clients
             start_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run)
             # start video clients
             print("IP address something: " + ip_address_sh)
-            start_video_clients(args.videoclients, "elastic", 30, ip_address_sh, net, subfolder, run, num_clients=total_num_hosts,
+            start_video_clients(args.videoclients, test_dict['adapt'], 30, ip_address_sh, net, subfolder, run, num_clients=total_num_hosts,
                                 output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
             #start_iperf(net)
             print("sleeping")
@@ -565,17 +564,14 @@ def goDashBedNet():
             Popen("killall -9 cat", shell=True).wait()
             #sleep(15)
             genstats_voip_clients(serverHost, voip_host,  int(
-                args.voipclients), subfolder, run)
+                args.voipclients), subfolder, run, current_folder)
             #sleep(5)
             #CLI(net)
 
-    #CLI( net )
-    #serverHost.cmdPrint('kill %d'%pid_python)
-    Popen("killall -9 cat", shell=True).wait()
-    net.stop()
-    Popen("pgrep -f caddy | xargs kill -9", shell=True).wait()
-    Popen("pgrep -f godash | xargs kill -9", shell=True).wait()
-    #Popen("killall -9 MP4Client", shell=True).wait()
+            net.stop()
+            Popen("pgrep -f caddy | xargs kill -9", shell=True).wait()
+            Popen("pgrep -f godash | xargs kill -9", shell=True).wait()
+            #Popen("killall -9 MP4Client", shell=True).wait()
 
 
 if __name__ == '__main__':
