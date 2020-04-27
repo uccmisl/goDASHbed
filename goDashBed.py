@@ -186,7 +186,7 @@ def modify_dict(_dict, i, run, **params):
         elif k == "debug":
             _dict[k] = args.debug
         elif k == "streamDuration":
-            _dict[k] = args.duration
+            _dict[k] = int(args.duration)
         elif k == "quic":
             if args.transport_mode == "quic":
                 _dict[k] = "on"
@@ -355,6 +355,7 @@ def start_video_clients(num_video, algorithm, buffer_level, server_ip, net, subf
         # - files
         log_folder = params["output_folder"] + "/R" + \
             str(run) + params["current_folder"]+log_folder_name+"/"+client_name
+        print(log_folder)
         # lets create the file output folder structure
         if not os.path.exists(log_folder):
             os.makedirs(log_folder)
@@ -363,7 +364,7 @@ def start_video_clients(num_video, algorithm, buffer_level, server_ip, net, subf
         modify_dict(params["dic"], i, run, **params)
 
         # lets call each client from within its output folder
-        temp_host.cmd("cd " + log_folder+"../")
+        temp_host.cmd("cd " + log_folder+"../../")
 
         cmd = params["cwd"]+"/../goDASH/godash/godash --config " + \
             params["output_folder"]+"/R" + \
@@ -507,7 +508,7 @@ def goDashBedNet():
                 tt2 = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
                 #tt = serverHost.cmd('./caddy -host %s -port 8080 -root /var/www/html &'%ip_address_sh)
                 tt = serverHost.cmd(
-                    './caddy -conf ./caddy-config/TestbedTCP/Caddyfile &')
+                    './caddy -conf ./caddy-config/TestbedTCP/CaddyFile &')
             #print(tt)
             sleep(3)
             #print (tt)
@@ -574,7 +575,7 @@ def goDashBedNet():
             genstats_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run, current_folder)
             #sleep(5)
-            #CLI(net)
+            CLI(net)
 
             net.stop()
             if args.transport_mode == "tcp":
