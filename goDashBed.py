@@ -560,8 +560,8 @@ def goDashBedNet():
             os.system(
                 "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (1000, 1000))
             sleep(int(args.duration)+10)
-            Popen("pgrep -f dashc | xargs kill -9", shell=True).wait()
-            Popen("killall -9 cat", shell=True).wait()
+            # Popen("pgrep -f dashc | xargs kill -9", shell=True).wait()
+            # Popen("killall -9 cat", shell=True).wait()
             #sleep(15)
             genstats_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run, current_folder)
