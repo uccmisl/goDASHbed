@@ -54,6 +54,8 @@ from urls.mpdURL import *
 from random import randint
 import io
 import json
+import threading
+from threading import Thread
 # Parse arguments
 
 parser = ArgumentParser(description="goDASHBed - Better than sliced bread")
@@ -129,7 +131,6 @@ parser.add_argument('--terminalPrint',
 
 # Expt parameters
 args = parser.parse_args()
-
 
 # ouptut folder structure
 # output
@@ -237,27 +238,71 @@ def modify_zero_thr2(bw_array):
                     zero_array.append(bw_array[i][1])
     return bw_array
 
+# Class to start the throttle link thread
+class ThrottleLink:
 
+    def __init__(self):
+        self._running = True
+        self._stop_me = False
+
+    def terminate(self):
+        self._running = False
+        self._stop_me = True
+
+    def run(self, bw_a):
+        print("Throttling the link")
+        num_of_sec = 0
+        sec_step = 0
+
+        for i in range(len(bw_a)):
+            print("BW: " + str(bw_a[i][1]))
+            os.system("tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" %
+                      (bw_a[i][1], bw_a[i][1]))
+
+            # if stop is True, then return
+            if self._stop_me:
+                return
+            # otherwise keep printing the bandwidth
+            else:
+                sleep(bw_a[i][0]/1000)
+            # print "Time: " +str(num_of_sec)
+            #if num_of_sec > int(args.duration)+5:
+            #    print("Over "+str(args.duration) + "...")
+            #    os.system(
+            #        "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (10000, 10000))
+            #    return
+
+'''
 def throttleLink(bw_a):
     print("Throttling the link")
     num_of_sec = 0
     sec_step = 0
 
     for i in range(len(bw_a)):
-        print("BW: " + str(bw_a[i][1]))
+        logging.debug("BW: " + str(bw_a[i][1]))
         os.system("tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" %
                   (bw_a[i][1], bw_a[i][1]))
         num_of_sec = num_of_sec + bw_a[i][0]/1000
 
         # print "Time: " +str(num_of_sec)
-        if num_of_sec > int(args.duration)+5:
-            print("Over "+str(args.duration) + "...")
-            os.system(
-                "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (10000, 10000))
-            return
-        else:
-            sleep(bw_a[i][0]/1000)
+        #if num_of_sec > int(args.duration)+5:
+        #    print("Over "+str(args.duration) + "...")
+        #    os.system(
+        #        "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (10000, 10000))
+        #    return
+        #else:
+        sleep(bw_a[i][0]/1000)
+'''
 
+def video_clients_completed(processes, tl):
+    # for all the clients, work out when they finish
+    for p in processes:
+        # lets stop when the processes complete
+        if p.cmd('wait', p.lastPid) != 0:
+            print("Client at " +str(p) + " has completed streaming")
+            continue
+
+    return
 
 def monitor_devs_ng(fname="%s/txrate.txt" % ".", interval_sec=0.01):
     """Uses bwm-ng tool to collect iface tx rate stats.  Very reliable."""
@@ -373,18 +418,15 @@ def start_video_clients(num_video, algorithm, buffer_level, server_ip, net, subf
             params["output_folder"]+"/R" + \
             str(run)+params["current_folder"]+config_folder_name+client_config
         print(cmd)
-        # temp_host.cmd(cmd + " &")
-        p = Popen(cmd, shell=True)
+        # get the pid
+        #temp_host.sendCmd(cmd + " &", printPid=True )
+        temp_host.cmd(cmd + " &")
         # add this command to our list of processes
-        processes.append(p)
+        processes.append(temp_host)
         # sleep(1)
         print("Started: " + str(i))
 
-    # will this tell us when all processes are complete
-    for p in processes:
-        if p.wait() != 0:
-            if not getHeaders:
-                print("There was an error")
+    return processes
 
 
 def start_voip_clients(server_host, client_host, num, subfolder, run):
@@ -518,10 +560,12 @@ def goDashBedNet():
                     "./example '-bind=www.godashbed.org:443' '-www=/var/www/html' &")
             elif args.transport_mode == "tcp":
                 print("Starting TCP server")
-                tt2 = serverHost.cmd(
-                    "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
-                #tt = serverHost.cmd('./caddy -host %s -port 8080 -root /var/www/html &'%ip_address_sh)
                 tt = serverHost.cmd(
+                    "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
+                tt1 = serverHost.cmd(
+                    "chmod +x ./caddy")
+                #tt = serverHost.cmd('./caddy -host %s -port 8080 -root /var/www/html &'%ip_address_sh)
+                tt2 = serverHost.cmd(
                     './caddy -conf ./caddy-config/TestbedTCP/CaddyFile &')
             #print(tt)
             sleep(3)
@@ -579,16 +623,39 @@ def goDashBedNet():
                                             output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
             #start_iperf(net)
             # print("sleeping")
-            throttleLink(bw_a)
-            os.system(
-                "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (1000, 1000))
+            print(processes)
+
+            #stop_threads = False
+            #tl = threading.Thread(target=throttleLink(bw_a), daemon = True)
+            #vc = threading.Thread(target=video_clients_completed(processes), daemon = True)
+            #vc.start()
+            #tl.start()
+
+            tl = ThrottleLink()
+            t = Thread(target = tl.run, args =(bw_a, ))
+            t.start()
+            #t.start()
+            vc = threading.Thread(target=video_clients_completed(processes, tl), daemon = True)
+            vc.start()
+
+            tl.terminate()
+            #t.join()
+            # Signal termination
+            #c.terminate()
+            #os.system("tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (1000, 1000))
             # sleep(int(args.duration)+10)
             # will this tell us when all processes are complete
-            for p in processes:
-                if p.wait() != 0:
-                    print("There was an error")
+            #for p in processes:
+            #    # lets stop when the processes complete
+            #    if p.cmd('wait', p.lastPid) != 0:
+            #        print(p, "complete")
+            #        continue
             # now all clients have finished
+            sleep(1)
             print("all godash clients have finished streaming")
+            # reset the system network
+            os.system(
+                "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (10000, 10000))
 
             # Popen("pgrep -f dashc | xargs kill -9", shell=True).wait()
             # Popen("killall -9 cat", shell=True).wait()
@@ -603,8 +670,6 @@ def goDashBedNet():
                 Popen("pgrep -f caddy | xargs kill -9", shell=True).wait()
             if args.transport_mode == "quic":
                 Popen("pgrep -f example | xargs kill -9", shell=True).wait()
-            #Popen("pgrep -f godash | xargs kill -9", shell=True).wait()
-            #Popen("killall -9 MP4Client", shell=True).wait()
 
 
 if __name__ == '__main__':
