@@ -265,34 +265,7 @@ class ThrottleLink:
             # otherwise keep printing the bandwidth
             else:
                 sleep(bw_a[i][0]/1000)
-            # print "Time: " +str(num_of_sec)
-            #if num_of_sec > int(args.duration)+5:
-            #    print("Over "+str(args.duration) + "...")
-            #    os.system(
-            #        "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (10000, 10000))
-            #    return
 
-'''
-def throttleLink(bw_a):
-    print("Throttling the link")
-    num_of_sec = 0
-    sec_step = 0
-
-    for i in range(len(bw_a)):
-        logging.debug("BW: " + str(bw_a[i][1]))
-        os.system("tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" %
-                  (bw_a[i][1], bw_a[i][1]))
-        num_of_sec = num_of_sec + bw_a[i][0]/1000
-
-        # print "Time: " +str(num_of_sec)
-        #if num_of_sec > int(args.duration)+5:
-        #    print("Over "+str(args.duration) + "...")
-        #    os.system(
-        #        "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (10000, 10000))
-        #    return
-        #else:
-        sleep(bw_a[i][0]/1000)
-'''
 
 def video_clients_completed(processes, tl):
     # for all the clients, work out when they finish
@@ -301,7 +274,6 @@ def video_clients_completed(processes, tl):
         if p.cmd('wait', p.lastPid) != 0:
             print("Client at " +str(p) + " has completed streaming")
             continue
-
     return
 
 def monitor_devs_ng(fname="%s/txrate.txt" % ".", interval_sec=0.01):
@@ -528,7 +500,6 @@ def goDashBedNet():
             net.start()
 
             # get voip client host - it is the last
-            print('h%d' % (total_num_hosts))
             voip_host = net.getNodeByName('h%d' % (total_num_hosts))
             # leaverage D-ITG capabilites
             prepare_voip_clients(int(args.voipclients), voip_host,
@@ -548,14 +519,8 @@ def goDashBedNet():
 
             if args.transport_mode == "quic":
                 print("Starting QUIC server")
-                #tt = serverHost.cmd("./caddy -host %s -port 8081 -quic -root ./ &"%ip_address_sh)
-                #tt4 = serverHost.cmd("sudo systemctl stop apache2.service")
-                #tt = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
-                #tt1 = serverHost.cmd("./caddy -conf ./caddy-config/Testbed/Caddyfile -quic &")
-                #tt1 = serverHost.cmd("./caddy -conf ./caddy-config/Caddyfile -quic &")
                 tt2 = serverHost.cmd(
                     "sudo setcap CAP_NET_BIND_SERVICE=+eip example")
-                # tt1 = serverHost.cmd("./example -conf ./caddy-config/Caddyfile -quic &")
                 tt = serverHost.cmd(
                     "./example '-bind=www.godashbed.org:443' '-www=/var/www/html' &")
             elif args.transport_mode == "tcp":
@@ -564,18 +529,14 @@ def goDashBedNet():
                     "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
                 tt1 = serverHost.cmd(
                     "chmod +x ./caddy")
-                #tt = serverHost.cmd('./caddy -host %s -port 8080 -root /var/www/html &'%ip_address_sh)
                 tt2 = serverHost.cmd(
                     './caddy -conf ./caddy-config/TestbedTCP/CaddyFile &')
-            #print(tt)
             sleep(3)
-            #print (tt)
-            #pid_python = int(tt.split()[1])
             # get ip address of server host
             s1 = net.getNodeByName('s1')
             s0 = net.getNodeByName('s0')
-            print(s1.intfList())
-            print(s0.intfList()[2:])
+            #print(s1.intfList())
+            #print(s0.intfList()[2:])
             subfolder = args.scenarioname + "_R" + \
                 str(args.numruns) + '/godash_' + test_dict['adapt'] + \
                 '_' + str(total_num_hosts).zfill(3)
@@ -585,8 +546,6 @@ def goDashBedNet():
             if ".csv" in trace_file:
                 bw_a = readCsvThr(trace_file)
             # creating bottleneck
-            print("exec tc_q_drr.sh")
-            print(serverHost.nameToIntf)
             print("-----------")
             print("Video server", serverHost.params["ip"].split("/")[0])
             print("-----------")
@@ -605,65 +564,39 @@ def goDashBedNet():
             # - config
             config_folder = output_folder+"/R" + \
                 str(run)+current_folder+config_folder_name
-            print(config_folder)
 
             # lets create the output folder structure
             if not os.path.exists(config_folder):
                 os.makedirs(config_folder)
 
-            #continue
-
             # start voip clients
             start_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run)
             # start video clients
-            print("IP address something: " + ip_address_sh)
+            #print("IP address something: " + ip_address_sh)
             # start the clients and save as an array of processes
             processes = start_video_clients(args.videoclients, test_dict['adapt'], 30, ip_address_sh, net, subfolder, run, num_clients=total_num_hosts,
                                             output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
-            #start_iperf(net)
-            # print("sleeping")
-            print(processes)
 
-            #stop_threads = False
-            #tl = threading.Thread(target=throttleLink(bw_a), daemon = True)
-            #vc = threading.Thread(target=video_clients_completed(processes), daemon = True)
-            #vc.start()
-            #tl.start()
-
+            # lets start throttling the link
             tl = ThrottleLink()
             t = Thread(target = tl.run, args =(bw_a, ))
             t.start()
-            #t.start()
+            # lets check if the client have completed
             vc = threading.Thread(target=video_clients_completed(processes, tl), daemon = True)
             vc.start()
-
+            #  once the client complete, lets stop the throttling
             tl.terminate()
-            #t.join()
-            # Signal termination
-            #c.terminate()
-            #os.system("tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (1000, 1000))
-            # sleep(int(args.duration)+10)
-            # will this tell us when all processes are complete
-            #for p in processes:
-            #    # lets stop when the processes complete
-            #    if p.cmd('wait', p.lastPid) != 0:
-            #        print(p, "complete")
-            #        continue
-            # now all clients have finished
-            sleep(1)
+
+            sleep(2)
             print("all godash clients have finished streaming")
             # reset the system network
             os.system(
                 "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (10000, 10000))
 
-            # Popen("pgrep -f dashc | xargs kill -9", shell=True).wait()
-            # Popen("killall -9 cat", shell=True).wait()
-            #sleep(15)
             genstats_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run, current_folder)
-            #sleep(5)
-            # CLI(net)
+
 
             net.stop()
             if args.transport_mode == "tcp":
