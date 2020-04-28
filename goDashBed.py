@@ -344,7 +344,10 @@ def ping_latency(net, host):
 
 def start_video_clients(num_video, algorithm, buffer_level, server_ip, net, subf, run, **params):
 
-    # we use fixed movie - TODO: add url as argument
+    ## we use fixed movie - TODO: add url as argument
+
+    # our array of processes
+    processes = []
 
     print("Num. of video clients: " + num_video)
     for i in range(2, 2+int(num_video)):
@@ -370,9 +373,18 @@ def start_video_clients(num_video, algorithm, buffer_level, server_ip, net, subf
             params["output_folder"]+"/R" + \
             str(run)+params["current_folder"]+config_folder_name+client_config
         print(cmd)
-        temp_host.cmd(cmd + " &")
-        sleep(1)
+        # temp_host.cmd(cmd + " &")
+        p = Popen(cmd, shell=True)
+        # add this command to our list of processes
+        processes.append(p)
+        # sleep(1)
         print("Started: " + str(i))
+
+    # will this tell us when all processes are complete
+    for p in processes:
+        if p.wait() != 0:
+            if not getHeaders:
+                print("There was an error")
 
 
 def start_voip_clients(server_host, client_host, num, subfolder, run):
@@ -499,13 +511,15 @@ def goDashBedNet():
                 #tt = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
                 #tt1 = serverHost.cmd("./caddy -conf ./caddy-config/Testbed/Caddyfile -quic &")
                 #tt1 = serverHost.cmd("./caddy -conf ./caddy-config/Caddyfile -quic &")
-                tt2 = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip example")
+                tt2 = serverHost.cmd(
+                    "sudo setcap CAP_NET_BIND_SERVICE=+eip example")
                 # tt1 = serverHost.cmd("./example -conf ./caddy-config/Caddyfile -quic &")
                 tt = serverHost.cmd(
                     "./example '-bind=www.godashbed.org:443' '-www=/var/www/html' &")
             elif args.transport_mode == "tcp":
                 print("Starting TCP server")
-                tt2 = serverHost.cmd("sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
+                tt2 = serverHost.cmd(
+                    "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
                 #tt = serverHost.cmd('./caddy -host %s -port 8080 -root /var/www/html &'%ip_address_sh)
                 tt = serverHost.cmd(
                     './caddy -conf ./caddy-config/TestbedTCP/CaddyFile &')
@@ -541,7 +555,6 @@ def goDashBedNet():
                     intf.name, args.delay), shell=True, stdout=subprocess.PIPE).stdout
             sleep(5)
 
-
             # create a folder based on date and time for each run
             current_folder = "/" + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
@@ -561,21 +574,29 @@ def goDashBedNet():
                 args.voipclients), subfolder, run)
             # start video clients
             print("IP address something: " + ip_address_sh)
-            start_video_clients(args.videoclients, test_dict['adapt'], 30, ip_address_sh, net, subfolder, run, num_clients=total_num_hosts,
-                                output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
+            # start the clients and save as an array of processes
+            processes = start_video_clients(args.videoclients, test_dict['adapt'], 30, ip_address_sh, net, subfolder, run, num_clients=total_num_hosts,
+                                            output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
             #start_iperf(net)
-            print("sleeping")
+            # print("sleeping")
             throttleLink(bw_a)
             os.system(
                 "tc class change dev s1-eth1 parent 1:0 classid 1:1 htb rate %fkbit ceil %fkbit" % (1000, 1000))
-            sleep(int(args.duration)+10)
+            # sleep(int(args.duration)+10)
+            # will this tell us when all processes are complete
+            for p in processes:
+                if p.wait() != 0:
+                    print("There was an error")
+            # now all clients have finished
+            print("all godash clients have finished streaming")
+
             # Popen("pgrep -f dashc | xargs kill -9", shell=True).wait()
             # Popen("killall -9 cat", shell=True).wait()
             #sleep(15)
             genstats_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run, current_folder)
             #sleep(5)
-            CLI(net)
+            # CLI(net)
 
             net.stop()
             if args.transport_mode == "tcp":
