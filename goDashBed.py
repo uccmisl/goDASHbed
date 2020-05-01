@@ -74,11 +74,6 @@ parser.add_argument('--delay',
                     help="Delay in milliseconds of bottleneck link",
                     default=40)
 
-# parser.add_argument('--cong',
-#                     dest="cong",
-#                     help="Congestion control algorithm to use",
-#                     default="reno")
-
 parser.add_argument('--numruns',
                     dest="numruns",
                     help="Numbe of times experiment needs to be repeated",
@@ -104,15 +99,6 @@ parser.add_argument('--duration',
                     help="Duration of experiment (in seconds.)",
                     default=0)
 
-parser.add_argument('--scenarioname',
-                    dest="scenarioname",
-                    help="Scenario name for experiment",
-                    default="test")
-
-parser.add_argument('--sched',
-                    dest="sched",
-                    default="fifo",
-                    help="Queueing scheduler")
 
 parser.add_argument('--bwKPI',
                     dest="bwKPI",
@@ -276,14 +262,6 @@ def video_clients_completed(processes, tl):
             continue
     return
 
-def monitor_devs_ng(fname="%s/txrate.txt" % ".", interval_sec=0.01):
-    """Uses bwm-ng tool to collect iface tx rate stats.  Very reliable."""
-    cmd = ("sleep 1; bwm-ng -I s1-eth1 -t %s -o csv "
-           "-u bits -T rate -C ',' > %s" %
-           (interval_sec * 1000, fname))
-    Popen(cmd, shell=True).wait()
-
-
 def monitor_devs(dev_pattern='^s', fname="%s/bytes_sent.txt" %
                  ".", interval_sec=0.01):
     """Aggregates (sums) all txed bytes and rate (in Mbps) from
@@ -341,14 +319,6 @@ def qmon(pat):
     return monitor
 
 
-def rmon(pat):
-    monitor = Process(target=monitor_devs_ng, args=(
-        '%s_bytes_sent.txt' % pat, 1.0))
-    monitor.start()
-    print("Monitoring Rate")
-
-    return monitor
-
 
 def ping_latency(net, host):
     "(Incomplete) verify link latency"
@@ -359,7 +329,7 @@ def ping_latency(net, host):
     print(result.strip())
 
 
-def start_video_clients(num_video, algorithm, buffer_level, server_ip, net, subf, run, **params):
+def start_video_clients(num_video, algorithm, net, run, **params):
 
     ## we use fixed movie - TODO: add url as argument
 
@@ -375,7 +345,7 @@ def start_video_clients(num_video, algorithm, buffer_level, server_ip, net, subf
         # - files
         log_folder = params["output_folder"] + "/R" + \
             str(run) + params["current_folder"]+log_folder_name+"/"+client_name
-        print(log_folder)
+      
         # lets create the file output folder structure
         if not os.path.exists(log_folder):
             os.makedirs(log_folder)
@@ -389,20 +359,17 @@ def start_video_clients(num_video, algorithm, buffer_level, server_ip, net, subf
         cmd = params["cwd"]+"/../goDASH/godash/godash --config " + \
             params["output_folder"]+"/R" + \
             str(run)+params["current_folder"]+config_folder_name+client_config
-        print(cmd)
-        # get the pid
-        #temp_host.sendCmd(cmd + " &", printPid=True )
+        
         temp_host.cmd(cmd + " &")
-        # add this command to our list of processes
         processes.append(temp_host)
-        # sleep(1)
-        print("Started: " + str(i))
+        
+        print("Started video client ID " + str(i))
 
     return processes
 
 
 def start_voip_clients(server_host, client_host, num, subfolder, run):
-    print("server voip " + server_host.name)
+    
     voip_s1 = client_host.popen(
         "ITGRecv -l %s/recv_%d_log_R%d" % (subfolder, num, run))
     print("starting sending")
@@ -415,14 +382,14 @@ def genstats_voip_clients(server_host, client_host, num, subfolder, run, time_st
     summ_file = "%s/%s_summ_%d_log_R%d" % (subfolder, time_stamp[1:], num, run)
     voip_s1 = client_host.cmd("ITGDec %s > %s" % (input_file, summ_file))
     voip_s1 = client_host.popen("rm %s" % (input_file))
+    voip_s1 = client_host.popen("rm sender_log_file1")
+    voip_s1 = client_host.popen("rm voipclients")
+    
 
 
 def prepare_voip_clients(num_voip, host, dur):
     ip_address = host.cmdPrint(
         "ifconfig %s-eth0 | grep inet | awk '{print $2}' | sed 's/addr://'" % host.name).split()[0]
-    print("-----------")
-    print("VOIP clients", ip_address)
-    print("-----------")
     with open("voipclients", "w+") as myfile:
         for i in range(num_voip):
             # currently hardcoded G.711
@@ -468,8 +435,7 @@ def goDashBedNet():
     _dict = create_dict(config_file)
     # print("How this dict looks alike: ")
     test_dict = create_dict_from_json(config_file)
-    # print(test_dict)
-    print("---- end dict ------")
+
     # lets create the log and config folder locations
     output_folder = cwd+output_folder_name
 
@@ -532,26 +498,20 @@ def goDashBedNet():
                 tt2 = serverHost.cmd(
                     './caddy -conf ./caddy-config/TestbedTCP/CaddyFile &')
             sleep(3)
+           
             # get ip address of server host
             s1 = net.getNodeByName('s1')
             s0 = net.getNodeByName('s0')
-            #print(s1.intfList())
-            #print(s0.intfList()[2:])
-            subfolder = args.scenarioname + "_R" + \
-                str(args.numruns) + '/godash_' + test_dict['adapt'] + \
-                '_' + str(total_num_hosts).zfill(3)
-            os.system("mkdir -p %s" % subfolder)
+
+
 
             print("Load bw values from trace: " + trace_file)
             if ".csv" in trace_file:
                 bw_a = readCsvThr(trace_file)
-            # creating bottleneck
-            print("-----------")
-            print("Video server", serverHost.params["ip"].split("/")[0])
-            print("-----------")
-            if args.sched == "fifo":
-                print("fifo")
-                getVersion = subprocess.Popen("bash tc_fifo.sh %s %d" % (
+
+            
+            print("Setting fifo queueing discipline")
+            getVersion = subprocess.Popen("bash tc_fifo.sh %s %d" % (
                     "s1-eth1", args.bw_net), shell=True, stdout=subprocess.PIPE).stdout
             for intf in s0.intfList()[2:]:
                 getVersion2 = subprocess.Popen("bash tc_delay.sh %s %d" % (
@@ -569,13 +529,17 @@ def goDashBedNet():
             if not os.path.exists(config_folder):
                 os.makedirs(config_folder)
 
+            print ('output_folder: ' + output_folder)
+            print ('current folder: ' + current_folder)
+            subfolder = output_folder+'/R'+str(run)+current_folder+'/voip/'
+            if not os.path.exists(subfolder):
+                os.system("mkdir -p %s" % subfolder)
             # start voip clients
             start_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run)
-            # start video clients
-            #print("IP address something: " + ip_address_sh)
-            # start the clients and save as an array of processes
-            processes = start_video_clients(args.videoclients, test_dict['adapt'], 30, ip_address_sh, net, subfolder, run, num_clients=total_num_hosts,
+            
+            # start the video clients and save as an array of processes
+            processes = start_video_clients(args.videoclients, test_dict['adapt'], net, run, num_clients=total_num_hosts,
                                             output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
 
             # lets start throttling the link
