@@ -16,7 +16,7 @@ GoDASHbed is a highly customizable framework for realistic large scale experimen
 
 Requirements:
  - [Mininet](http://mininet.org/)
- - [goDASH](https://github.com/uccmisl/godash.git)
+ - [godash](https://github.com/uccmisl/godash.git)
  - [D-ITG](www.grid.unina.it/software/ITG//download.php)
 
 --------------------------------------------------------
