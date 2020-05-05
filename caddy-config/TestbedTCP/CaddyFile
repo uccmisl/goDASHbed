@@ -11,7 +11,7 @@ www.goDASHbed.org:443 {
   gzip
  # needed for location of content to offer
   root /var/www/html
-  log access.log
+  log /output/caddy_access.log
 }
 
 http://www.goDASHbed.org {
@@ -24,5 +24,5 @@ http://www.goDASHbed.org {
   gzip
   # needed for location of content to offer
   root /var/www/html
-  log access.log
+  log /output/caddy_access.log
 }
