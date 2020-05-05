@@ -76,7 +76,7 @@ parser.add_argument('--delay',
 
 parser.add_argument('--numruns',
                     dest="numruns",
-                    help="Numbe of times experiment needs to be repeated",
+                    help="Number of times experiment will be repeated, based on number of trace files in the 'traces' folder",
                     default=1)
 
 parser.add_argument('--voipclients',
@@ -92,7 +92,7 @@ parser.add_argument('--videoclients',
 parser.add_argument('--tm',
                     dest="transport_mode",
                     default="tcp",
-                    help="Transport mode (tcp or quic")
+                    help="Transport mode (TCP - HTTP/HTTP2 or QUIC - HTTPS)")
 
 parser.add_argument('--duration',
                     dest="duration",
@@ -225,6 +225,8 @@ def modify_zero_thr2(bw_array):
     return bw_array
 
 # Class to start the throttle link thread
+
+
 class ThrottleLink:
 
     def __init__(self):
@@ -258,9 +260,10 @@ def video_clients_completed(processes, tl):
     for p in processes:
         # lets stop when the processes complete
         if p.cmd('wait', p.lastPid) != 0:
-            print("Client at " +str(p) + " has completed streaming")
+            print("Client at " + str(p) + " has completed streaming")
             continue
     return
+
 
 def monitor_devs(dev_pattern='^s', fname="%s/bytes_sent.txt" %
                  ".", interval_sec=0.01):
@@ -319,7 +322,6 @@ def qmon(pat):
     return monitor
 
 
-
 def ping_latency(net, host):
     "(Incomplete) verify link latency"
     h1 = net.getNodeByName(host)
@@ -345,7 +347,7 @@ def start_video_clients(num_video, algorithm, net, run, **params):
         # - files
         log_folder = params["output_folder"] + "/R" + \
             str(run) + params["current_folder"]+log_folder_name+"/"+client_name
-      
+
         # lets create the file output folder structure
         if not os.path.exists(log_folder):
             os.makedirs(log_folder)
@@ -359,17 +361,17 @@ def start_video_clients(num_video, algorithm, net, run, **params):
         cmd = params["cwd"]+"/../goDASH/godash/godash --config " + \
             params["output_folder"]+"/R" + \
             str(run)+params["current_folder"]+config_folder_name+client_config
-        
+
         temp_host.cmd(cmd + " &")
         processes.append(temp_host)
-        
+
         print("Started video client ID " + str(i))
 
     return processes
 
 
 def start_voip_clients(server_host, client_host, num, subfolder, run):
-    
+
     voip_s1 = client_host.popen(
         "ITGRecv -l %s/recv_%d_log_R%d" % (subfolder, num, run))
     print("starting sending")
@@ -384,7 +386,6 @@ def genstats_voip_clients(server_host, client_host, num, subfolder, run, time_st
     voip_s1 = client_host.popen("rm %s" % (input_file))
     voip_s1 = client_host.popen("rm sender_log_file1")
     voip_s1 = client_host.popen("rm voipclients")
-    
 
 
 def prepare_voip_clients(num_voip, host, dur):
@@ -498,18 +499,15 @@ def goDashBedNet():
                 tt2 = serverHost.cmd(
                     './caddy -conf ./caddy-config/TestbedTCP/CaddyFile &')
             sleep(3)
-           
+
             # get ip address of server host
             s1 = net.getNodeByName('s1')
             s0 = net.getNodeByName('s0')
-
-
 
             print("Load bw values from trace: " + trace_file)
             if ".csv" in trace_file:
                 bw_a = readCsvThr(trace_file)
 
-            
             print("Setting fifo queueing discipline")
             getVersion = subprocess.Popen("bash tc_fifo.sh %s %d" % (
                     "s1-eth1", args.bw_net), shell=True, stdout=subprocess.PIPE).stdout
@@ -529,25 +527,26 @@ def goDashBedNet():
             if not os.path.exists(config_folder):
                 os.makedirs(config_folder)
 
-            print ('output_folder: ' + output_folder)
-            print ('current folder: ' + current_folder)
+            print('output_folder: ' + output_folder)
+            print('current folder: ' + current_folder)
             subfolder = output_folder+'/R'+str(run)+current_folder+'/voip/'
             if not os.path.exists(subfolder):
                 os.system("mkdir -p %s" % subfolder)
             # start voip clients
             start_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run)
-            
+
             # start the video clients and save as an array of processes
             processes = start_video_clients(args.videoclients, test_dict['adapt'], net, run, num_clients=total_num_hosts,
                                             output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
 
             # lets start throttling the link
             tl = ThrottleLink()
-            t = Thread(target = tl.run, args =(bw_a, ))
+            t = Thread(target=tl.run, args=(bw_a, ))
             t.start()
             # lets check if the client have completed
-            vc = threading.Thread(target=video_clients_completed(processes, tl), daemon = True)
+            vc = threading.Thread(
+                target=video_clients_completed(processes, tl), daemon=True)
             vc.start()
             #  once the client complete, lets stop the throttling
             tl.terminate()
@@ -560,7 +559,6 @@ def goDashBedNet():
 
             genstats_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run, current_folder)
-
 
             net.stop()
             if args.transport_mode == "tcp":
