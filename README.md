@@ -16,7 +16,7 @@ GoDASHbed is a highly customizable framework for realistic large scale experimen
 
 Requirements:
  - [Mininet](http://mininet.org/)
- - [goDASH](https://github.com/uccmisl/goDASH.git)
+ - [goDASH](https://github.com/uccmisl/godash.git)
  - [D-ITG](www.grid.unina.it/software/ITG//download.php)
 
 --------------------------------------------------------
@@ -39,7 +39,7 @@ sudo chmod u=rwX,g=srX,o=rX -R /var/www
 ```
 update the url lists in `urls/mpdURL.py` to reflect the content downloaded
 ```
-/var/www/html/<folder> -> "http://www.goDASHbed.org/<folder>"
+/var/www/html/<folder> -> "http://www.godashbed.org/<folder>"
 ```
 You may also need to update the `configure.json` file in goDASHbed/config, and change url to point to the content downloaded
 
