@@ -1,6 +1,6 @@
 # goDashbed Application
 
-Current release version : 1.1
+Current release version : 1.1.5
 
 We kindly ask that should you mention godash or goDASHbed, or use our code, in your publication, that you would reference the following paper:
 
@@ -79,16 +79,17 @@ Flags for goDASH:
   --bwKPI               Name of the column indicating throughput (default="DL_bitrate")
   --debug               Print output of goDASH to the log file (default 'on')
   --terminalPrint       Print output of goDASH to the terminal screen (default 'on')
+  --server              Choice of Web server - WSGI (Caddy and QUIC) or ASGI (Hypercorn - currently only TCP)
 ```
 --------------------------------------------------------
 
 ## Examples to launch the app :
-run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with no debug or terminal print outs, once for each trace in the 'traces' folder, using TCP as the transport mode
+run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with no debug or terminal print outs, once for each trace in the 'traces' folder, using TCP as the transport mode and the ASGI Hypercorn/Quart Server
 ```
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off" --server "ASGI"
 ```
 
-run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with debug or terminal print outs, once for each trace in the 'traces' folder, using QUIC as the transport mode
+run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with debug or terminal print outs, once for each trace in the 'traces' folder, using QUIC as the transport mode and the WSGI Caddy/Example Server(s)
 ```
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on" --server "WSGI"
 ```
