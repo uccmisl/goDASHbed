@@ -76,7 +76,7 @@ parser.add_argument('--delay',
 
 parser.add_argument('--numruns',
                     dest="numruns",
-                    help="Numbe of times experiment needs to be repeated",
+                    help="Number of times experiment will be repeated, based on number of trace files in the 'traces' folder",
                     default=1)
 
 parser.add_argument('--voipclients',
@@ -92,7 +92,7 @@ parser.add_argument('--videoclients',
 parser.add_argument('--tm',
                     dest="transport_mode",
                     default="tcp",
-                    help="Transport mode (tcp or quic")
+                    help="Transport mode (TCP - HTTP/HTTP2 or QUIC - HTTPS)")
 
 parser.add_argument('--duration',
                     dest="duration",
@@ -234,6 +234,8 @@ def modify_zero_thr2(bw_array):
     return bw_array
 
 # Class to start the throttle link thread
+
+
 class ThrottleLink:
 
     def __init__(self):
@@ -267,9 +269,10 @@ def video_clients_completed(processes, tl):
     for p in processes:
         # lets stop when the processes complete
         if p.cmd('wait', p.lastPid) != 0:
-            print("Client at " +str(p) + " has completed streaming")
+            print("Client at " + str(p) + " has completed streaming")
             continue
     return
+
 
 def monitor_devs(dev_pattern='^s', fname="%s/bytes_sent.txt" %
                  ".", interval_sec=0.01):
@@ -326,7 +329,6 @@ def qmon(pat):
     print("Monitoring Queue Occupancy ... will save it to %s_sw0-qlen.txt " % "qlen_test")
 
     return monitor
-
 
 
 def ping_latency(net, host):
@@ -590,8 +592,8 @@ def goDashBedNet():
             if not os.path.exists(config_folder):
                 os.makedirs(config_folder)
 
-            print ('output_folder: ' + output_folder)
-            print ('current folder: ' + current_folder)
+            print('output_folder: ' + output_folder)
+            print('current folder: ' + current_folder)
             subfolder = output_folder+'/R'+str(run)+current_folder+'/voip/'
             if not os.path.exists(subfolder):
                 os.system("mkdir -p %s" % subfolder)
@@ -607,10 +609,11 @@ def goDashBedNet():
 
             # lets start throttling the link
             tl = ThrottleLink()
-            t = Thread(target = tl.run, args =(bw_a, ))
+            t = Thread(target=tl.run, args=(bw_a, ))
             t.start()
             # lets check if the client have completed
-            vc = threading.Thread(target=video_clients_completed(processes, tl), daemon = True)
+            vc = threading.Thread(
+                target=video_clients_completed(processes, tl), daemon=True)
             vc.start()
             #  once the client complete, lets stop the throttling
             tl.terminate()
@@ -623,7 +626,6 @@ def goDashBedNet():
 
             genstats_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run, current_folder)
-
 
             net.stop()
             if args.transport_mode == "tcp" and args.serverType == "WSGI":
