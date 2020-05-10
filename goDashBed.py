@@ -23,7 +23,7 @@ References:
 1. Alessio Botta, Alberto Dainotti, and Antonio Pescap;. 2012. A tool for the generation of realistic network workload for emerging networking scenarios. Comput. Netw. (October 2012)
 
 example call to goDashBed.py
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off"  --server "WSGI"
 '''
 
 
@@ -99,7 +99,6 @@ parser.add_argument('--duration',
                     help="Duration of experiment (in seconds.)",
                     default=0)
 
-
 parser.add_argument('--bwKPI',
                     dest="bwKPI",
                     default="DL_bitrate",
@@ -115,6 +114,11 @@ parser.add_argument('--terminalPrint',
                     help="print output of goDASH to the terminal screen",
                     default="on")
 
+parser.add_argument('--server',
+                    dest="serverType",
+                    help="Choice of Web server - WSGI (Caddy and QUIC) or ASGI (Hypercorn)",
+                    default="WSGI")
+
 # Expt parameters
 args = parser.parse_args()
 
@@ -129,6 +133,11 @@ log_folder_name = "/files"
 # get all the possible DASH MPD files from the H264 UHD dataset
 urls = full_url_list+main_url_list+live_url_list + \
     full_byte_range_url_list+main_byte_range_url_list
+
+
+def clean_up(voip_host):
+    # clean up the main godashbed folder if the script stops abruptly
+    voip_host.popen("rm voipclients")
 
 
 def create_dict_from_json(config_file):
@@ -345,7 +354,7 @@ def start_video_clients(num_video, algorithm, net, run, **params):
         # - files
         log_folder = params["output_folder"] + "/R" + \
             str(run) + params["current_folder"]+log_folder_name+"/"+client_name
-      
+
         # lets create the file output folder structure
         if not os.path.exists(log_folder):
             os.makedirs(log_folder)
@@ -359,17 +368,19 @@ def start_video_clients(num_video, algorithm, net, run, **params):
         cmd = params["cwd"]+"/../goDASH/godash/godash --config " + \
             params["output_folder"]+"/R" + \
             str(run)+params["current_folder"]+config_folder_name+client_config
-        
+
+        # print(cmd)
+
         temp_host.cmd(cmd + " &")
         processes.append(temp_host)
-        
+
         print("Started video client ID " + str(i))
 
     return processes
 
 
 def start_voip_clients(server_host, client_host, num, subfolder, run):
-    
+
     voip_s1 = client_host.popen(
         "ITGRecv -l %s/recv_%d_log_R%d" % (subfolder, num, run))
     print("starting sending")
@@ -384,7 +395,7 @@ def genstats_voip_clients(server_host, client_host, num, subfolder, run, time_st
     voip_s1 = client_host.popen("rm %s" % (input_file))
     voip_s1 = client_host.popen("rm sender_log_file1")
     voip_s1 = client_host.popen("rm voipclients")
-    
+
 
 
 def prepare_voip_clients(num_voip, host, dur):
@@ -425,6 +436,12 @@ class TwoSwitchTopo(Topo):
 
 def goDashBedNet():
     "Create network and run experiment"
+
+    # lets start to check on the script arguements:
+    if args.serverType != "ASGI" and args.serverType != "WSGI":
+        print("\n**** Incorrect Web Server has been choosen ****")
+        print("**** Please choose either ASGI (Hypercorn) or WSGI (Caddy and QUIC) ****\n")
+        sys.exit(0)
 
     print("preparing config files for goDASH")
     # lets read in the goDASH config file
@@ -483,33 +500,77 @@ def goDashBedNet():
             # stop the apache server
             tt4 = serverHost.cmd("sudo systemctl stop apache2.service")
 
-            if args.transport_mode == "quic":
-                print("Starting QUIC server")
-                tt2 = serverHost.cmd(
-                    "sudo setcap CAP_NET_BIND_SERVICE=+eip example")
-                tt = serverHost.cmd(
-                    "./example '-bind=www.godashbed.org:443' '-www=/var/www/html' &")
-            elif args.transport_mode == "tcp":
-                print("Starting TCP server")
-                tt = serverHost.cmd(
-                    "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
+            # check to see if Caddy/Example or Hypercorn is being used
+            if args.serverType == "WSGI":
+                print("Calling WSGI Server...", end=" ")
+                if args.transport_mode == "quic":
+                    print("- QUIC enabled...")
+                    tt2 = serverHost.cmd(
+                        "sudo setcap CAP_NET_BIND_SERVICE=+eip example")
+                    tt = serverHost.cmd(
+                        "./example '-bind=www.godashbed.org:443' '-www=/var/www/html' &")
+                elif args.transport_mode == "tcp":
+                    print("- TCP HTTPS enabled...")
+                    tt = serverHost.cmd(
+                        "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
+                    tt1 = serverHost.cmd(
+                        "chmod +x ./caddy")
+                    tt2 = serverHost.cmd(
+                        './caddy -conf ./caddy-config/TestbedTCP/CaddyFile &')
+
+            elif args.serverType == "ASGI":
+                print("Calling Hypercorn ASGI Server...", end=" ")
                 tt1 = serverHost.cmd(
-                    "chmod +x ./caddy")
-                tt2 = serverHost.cmd(
-                    './caddy -conf ./caddy-config/TestbedTCP/CaddyFile &')
+                    "sudo setcap CAP_NET_BIND_SERVICE=+eip hypercorn")
+                if args.transport_mode == "quic":
+                    print("- QUIC is currently not enabled...")
+                    print("For ASGI, please select --tm \"tcp\"\n")
+                    clean_up(voip_host)
+                    sys.exit(0)
+                    # tt = serverHost.cmd(
+                    #     "hypercorn"\
+                    #     " --certfile /home/misl/Code/goDASH/goDASH/godash/http/certs/cert.pem"\
+                    #     " --keyfile /home/misl/Code/goDASH/goDASH/godash/http/certs/key.pem"\
+                    #     " --quic-bind www.goDASHbed.org:444"\
+                    #     # " --bind www.goDASHbed.org:443"\
+                    #     " hypercorn_goDASHbed:app &")
+                elif args.transport_mode == "tcp":
+                    # this permits http to https redirection - if we need it
+                    # tt = serverHost.cmd(
+                    #     "hypercorn"\
+                    # " --certfile ../goDASH/godash/http/certs/cert.pem"\
+                    # " --keyfile ../goDASH/godash/http/certs/key.pem"\
+                    # " --bind www.goDASHbed.org:443"\
+                    # " --insecure-bind www.goDASHbed.org:80"\
+                    # " hypercorn_goDASHbed:redirected_app &")
+
+                    # lets do this dependent on the structure of the input urls
+                    if "https" in urls[0]:
+                        print("- TCP HTTPS enabled...")
+                        tt = serverHost.cmd(
+                            "hypercorn"\
+                        " --certfile ../goDASH/godash/http/certs/cert.pem"\
+                        " --keyfile ../goDASH/godash/http/certs/key.pem"\
+                        " --bind www.goDASHbed.org:443"\
+                        " hypercorn_goDASHbed:app &")
+                    else:
+                        print("- TCP HTTP enabled...")
+                        tt = serverHost.cmd(
+                            "hypercorn"\
+                            " --bind www.goDASHbed.org:80"\
+                            " hypercorn_goDASHbed:app &")
+
             sleep(3)
-           
+
             # get ip address of server host
             s1 = net.getNodeByName('s1')
             s0 = net.getNodeByName('s0')
-
-
 
             print("Load bw values from trace: " + trace_file)
             if ".csv" in trace_file:
                 bw_a = readCsvThr(trace_file)
 
-            
+
             print("Setting fifo queueing discipline")
             getVersion = subprocess.Popen("bash tc_fifo.sh %s %d" % (
                     "s1-eth1", args.bw_net), shell=True, stdout=subprocess.PIPE).stdout
@@ -537,10 +598,12 @@ def goDashBedNet():
             # start voip clients
             start_voip_clients(serverHost, voip_host,  int(
                 args.voipclients), subfolder, run)
-            
+
             # start the video clients and save as an array of processes
             processes = start_video_clients(args.videoclients, test_dict['adapt'], net, run, num_clients=total_num_hosts,
                                             output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
+
+            # CLI(net)
 
             # lets start throttling the link
             tl = ThrottleLink()
@@ -563,9 +626,10 @@ def goDashBedNet():
 
 
             net.stop()
-            if args.transport_mode == "tcp":
+            if args.transport_mode == "tcp" and args.serverType == "WSGI":
                 Popen("pgrep -f caddy | xargs kill -9", shell=True).wait()
-            if args.transport_mode == "quic":
+                caddy_s1 = serverHost.popen("rm ./output/caddy_access.log")
+            if args.transport_mode == "quic" and args.serverType == "WSGI":
                 Popen("pgrep -f example | xargs kill -9", shell=True).wait()
 
 

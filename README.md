@@ -1,8 +1,8 @@
 # goDashbed Application
 
-Current release version : 1.0
+Current release version : 1.1
 
-We kindly ask that should you mention goDASH or goDASHbed, or use our code, in your publication, that you would reference the following paper:
+We kindly ask that should you mention godash or goDASHbed, or use our code, in your publication, that you would reference the following paper:
 
 D. Raca, M. Manifacier, and J.J. Quinlan.  goDASH - GO accelerated HAS framework for rapid prototyping. 12th International Conference on Quality of Multimedia Experience (QoMEX), Athlone, Ireland. 26th to 28th May, 2020 [CORA](http://hdl.handle.net/10468/9845 "CORA") (To Appear)
 
@@ -16,7 +16,7 @@ GoDASHbed is a highly customizable framework for realistic large scale experimen
 
 Requirements:
  - [Mininet](http://mininet.org/)
- - [goDASH](https://github.com/uccmisl/godash.git)
+ - [godash](https://github.com/uccmisl/godash.git)
  - [D-ITG](www.grid.unina.it/software/ITG//download.php)
 
 --------------------------------------------------------
@@ -43,6 +43,8 @@ update the url lists in `urls/mpdURL.py` to reflect the content downloaded
 ```
 You may also need to update the `configure.json` file in goDASHbed/config, and change url to point to the content downloaded
 
+The clients will randomly choose one URL from the `urls/mpdURL.py` file.
+
 if using tcp with https - change http to https in the configure.json file
 if using QUIC - change http to https in the configure.json file
 
@@ -61,14 +63,32 @@ Easiest way to find this location, is to open the folder that you added `godash`
 ## Print help about parameters:
 
 ```
-./goDASHbed -help
+./goDASHbed --help
 ```
 Flags for goDASH:
 ```
-TODO
+  -h, --help            Show this help message and exit
+  --bw-net, -b          Bandwidth of bottleneck link - required parameter
+  --delay               Delay in milliseconds of bottleneck link (default 40ms)
+  --numruns             Number of times experiment will be repeated (default 1)
+                        Based on number of trace files in the 'traces' folder
+  --voipclients         Number of voip clients (default 0)
+  --videoclients        Number of video clients (default 0)
+  --tm                  Transport mode (TCP - HTTP/HTTP2 or QUIC - HTTPS)
+  --duration            Duration of experiment (in seconds.) (default 0s)
+  --bwKPI               Name of the column indicating throughput (default="DL_bitrate")
+  --debug               Print output of goDASH to the log file (default 'on')
+  --terminalPrint       Print output of goDASH to the terminal screen (default 'on')
 ```
-
 --------------------------------------------------------
 
 ## Examples to launch the app :
->sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug="off" --numruns 1 --tm "tcp"
+run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with no debug or terminal print outs, once for each trace in the 'traces' folder, using TCP as the transport mode
+```
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off"
+```
+
+run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with debug or terminal print outs, once for each trace in the 'traces' folder, using QUIC as the transport mode
+```
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on"
+```
