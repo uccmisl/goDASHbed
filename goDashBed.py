@@ -186,6 +186,8 @@ def modify_dict(_dict, i, run, **params):
         elif k == "quic":
             if args.transport_mode == "quic":
                 _dict[k] = "on"
+            else:
+            	_dict[k] = "off"
         elif k == "url":
             value = randint(0, len(urls)-1)
             _dict[k] = urls[value]
@@ -507,18 +509,15 @@ def goDashBedNet():
                 print("Calling WSGI Server...", end=" ")
                 if args.transport_mode == "quic":
                     print("- QUIC enabled...")
-                    tt2 = serverHost.cmd(
-                        "sudo setcap CAP_NET_BIND_SERVICE=+eip example")
                     tt = serverHost.cmd(
-                        "./example '-bind=www.godashbed.org:443' '-www=/var/www/html' &")
+                        "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
+                    tt2 = serverHost.cmd('caddy start --config ./caddy-config/TestbedTCP/CaddyFilev2QUIC --adapter caddyfile') 
+                        
                 elif args.transport_mode == "tcp":
                     print("- TCP HTTPS enabled...")
                     tt = serverHost.cmd(
                         "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
-                    tt1 = serverHost.cmd(
-                        "chmod +x ./caddy")
-                    tt2 = serverHost.cmd(
-                        './caddy -conf ./caddy-config/TestbedTCP/CaddyFile &')
+                   	tt2 = serverHost.cmd('caddy start --config ./caddy-config/TestbedTCP/CaddyFilev2TCP --adapter caddyfile')
 
             elif args.serverType == "ASGI":
                 print("Calling Hypercorn ASGI Server...", end=" ")
@@ -531,8 +530,8 @@ def goDashBedNet():
                     sys.exit(0)
                     # tt = serverHost.cmd(
                     #     "hypercorn"\
-                    #     " --certfile /home/misl/Code/goDASH/goDASH/godash/http/certs/cert.pem"\
-                    #     " --keyfile /home/misl/Code/goDASH/goDASH/godash/http/certs/key.pem"\
+                    #     " --certfile ../goDASH/godash/http/certs/cert.pem"\
+                    #     " --keyfile ../goDASH/godash/http/certs/key.pem"\
                     #     " --quic-bind www.goDASHbed.org:444"\
                     #     # " --bind www.goDASHbed.org:443"\
                     #     " hypercorn_goDASHbed:app &")
@@ -605,7 +604,7 @@ def goDashBedNet():
             processes = start_video_clients(args.videoclients, test_dict['adapt'], net, run, num_clients=total_num_hosts,
                                             output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
 
-            # CLI(net)
+            #CLI(net)
 
             # lets start throttling the link
             tl = ThrottleLink()
