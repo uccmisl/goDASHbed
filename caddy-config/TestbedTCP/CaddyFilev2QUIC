@@ -1,0 +1,30 @@
+# needed for experimental QUIC
+{
+	experimental_http3
+}
+
+www.godashbed.org:443 {
+    tls <godash folder location>/goDASH/godash/http/certs/cert.pem <godash folder location>/goDASH/godash/http/certs/key.pem
+  	encode gzip
+  	root * /var/www/html
+  	file_server
+  	log {
+		output file         ./output/caddy_access.log
+		format single_field common_log
+	}
+}
+
+
+# HTTP is not needed for caddyv2
+#http://www.godashbed.org:80 {
+#	reverse_proxy http://10.0.0.1:80 {
+#     	max_fails 1
+#     	# i think this ignores the ssl errors
+#  	}
+#	encode gzip
+#	root * /var/www/html
+#	log {
+#		output file         access.log
+#		format single_field common_log
+#	}
+#}
