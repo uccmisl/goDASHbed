@@ -48,6 +48,8 @@ The clients will randomly choose one URL from the `urls/mpdURL.py` file.
 if using tcp with https - change http to https in the configure.json file
 if using QUIC - change http to https in the configure.json file
 
+
+If you did not use the install script:
 to use HTTPS in goDASHbed, you need to modify the following files:
 `goDASHbed/caddy-config/TesbedTCP/CaddyFilev2TCP`
 `goDASHbed/caddy-config/TesbedTCP/CaddyFilev2QUIC`
