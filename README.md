@@ -1,6 +1,6 @@
 # goDashbed Application
 
-Current release version : 1.1.5
+Current release version : 1.1.7
 
 We kindly ask that should you mention godash or goDASHbed, or use our code, in your publication, that you would reference the following paper:
 
@@ -48,15 +48,16 @@ The clients will randomly choose one URL from the `urls/mpdURL.py` file.
 if using tcp with https - change http to https in the configure.json file
 if using QUIC - change http to https in the configure.json file
 
-to use tcp https in goDASHbed, you need to modify the following file:
-`goDASHbed/caddy-config/TesbedTCP/Caddyfile`
+to use HTTPS in goDASHbed, you need to modify the following files:
+`goDASHbed/caddy-config/TesbedTCP/CaddyFilev2TCP`
+`goDASHbed/caddy-config/TesbedTCP/CaddyFilev2QUIC`
 
-on line 10, chage the following:
+change the following line:
 ```
 tls <godash folder location>/godash/http/certs/cert.pem <godash folder location>/godash/http/certs/key.pem
 ```
 add the folder location that you downloaded goDASH to.
-Easiest way to find this location, is to open the folder that you added `godash` to, then open a terminal, type `pwd` and the reply is the folder location.  Add this output text into the `Caddyfile` replacing `<godash folder location>` as shown above.
+Easiest way to find this location, is to open the folder that you added `godash` to, then open a terminal, type `pwd` and the reply is the folder location.  Add this output text into the `CaddyfileCaddyFilev2TCP` and `CaddyFilev2QUIC` replacing `<godash folder location>` as shown above.
 
 --------------------------------------------------------
 
@@ -74,12 +75,12 @@ Flags for goDASH:
                         Based on number of trace files in the 'traces' folder
   --voipclients         Number of voip clients (default 0)
   --videoclients        Number of video clients (default 0)
-  --tm                  Transport mode (TCP - HTTP/HTTP2 or QUIC - HTTPS)
+  --tm                  Transport mode (TCP - HTTP/HTTPS or QUIC - HTTPS)
   --duration            Duration of experiment (in seconds.) (default 0s)
   --bwKPI               Name of the column indicating throughput (default="DL_bitrate")
   --debug               Print output of goDASH to the log file (default 'on')
   --terminalPrint       Print output of goDASH to the terminal screen (default 'on')
-  --server              Choice of Web server - WSGI (Caddy and QUIC) or ASGI (Hypercorn - currently only TCP)
+  --server              Choice of Web server - WSGI (Caddy - TCP/QUIC) or ASGI (Hypercorn - currently only TCP)
 ```
 --------------------------------------------------------
 
@@ -89,7 +90,7 @@ run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP 
 sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off" --server "ASGI"
 ```
 
-run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with debug or terminal print outs, once for each trace in the 'traces' folder, using QUIC as the transport mode and the WSGI Caddy/Example Server(s)
+run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with debug or terminal print outs, once for each trace in the 'traces' folder, using QUIC as the transport mode and the WSGI Caddy Server
 ```
 sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on" --server "WSGI"
 ```
