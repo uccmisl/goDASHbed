@@ -119,6 +119,11 @@ parser.add_argument('--server',
                     help="Choice of Web server - WSGI (Caddy and QUIC) or ASGI (Hypercorn)",
                     default="WSGI")
 
+parser.add_argument('--collaborative',
+                    dest="collaborative",
+                    help="run network in collaborative mode",
+                    default="off")
+
 # Expt parameters
 args = parser.parse_args()
 
@@ -133,6 +138,13 @@ log_folder_name = "/files"
 # get all the possible DASH MPD files from the H264 UHD dataset
 urls = full_url_list+main_url_list+live_url_list + \
     full_byte_range_url_list+main_byte_range_url_list
+
+# get all the possible DASH MPD files from the H264 UHD dataset
+if args.collaborative == "on":
+    # lets start consul
+    os.system("consul agent -dev &")
+    # lets sleep until consul is set up
+    sleep(5)
 
 
 def clean_up(voip_host):
@@ -183,6 +195,13 @@ def modify_dict(_dict, i, run, **params):
             _dict[k] = args.terminalPrint
         elif k == "debug":
             _dict[k] = args.debug
+        elif k == '"serveraddr"':
+            fo.write(str("\""+args.collaborative+"\""))
+        elif k == '"storeDash"':
+            if args.collaborative == "on":
+                fo.write(str("\""+args.collaborative+"\""))
+            else:
+                fo.write(str(v))
         elif k == "streamDuration":
             _dict[k] = int(args.duration)
         elif k == "quic":
@@ -403,7 +422,6 @@ def genstats_voip_clients(server_host, client_host, num, subfolder, run, time_st
     voip_s1 = client_host.popen("rm voipclients")
 
 
-
 def prepare_voip_clients(num_voip, host, dur):
     ip_address = host.cmdPrint(
         "ifconfig %s-eth0 | grep inet | awk '{print $2}' | sed 's/addr://'" % host.name).split()[0]
@@ -513,13 +531,15 @@ def goDashBedNet():
                     print("- QUIC enabled...")
                     tt = serverHost.cmd(
                         "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
-                    tt2 = serverHost.cmd('caddy start --config ./caddy-config/TestbedTCP/CaddyFilev2QUIC --adapter caddyfile')
+                    tt2 = serverHost.cmd(
+                        'caddy start --config ./caddy-config/TestbedTCP/CaddyFilev2QUIC --adapter caddyfile')
 
                 elif args.transport_mode == "tcp":
                     print("- TCP HTTPS enabled...")
                     tt = serverHost.cmd(
                         "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
-                    tt2 = serverHost.cmd('caddy start --config ./caddy-config/TestbedTCP/CaddyFilev2TCP --adapter caddyfile')
+                    tt2 = serverHost.cmd(
+                        'caddy start --config ./caddy-config/TestbedTCP/CaddyFilev2TCP --adapter caddyfile')
 
             elif args.serverType == "ASGI":
                 print("Calling Hypercorn ASGI Server...", end=" ")
@@ -551,16 +571,16 @@ def goDashBedNet():
                     if "https" in urls[0]:
                         print("- TCP HTTPS enabled...")
                         tt = serverHost.cmd(
-                            "hypercorn"\
-                        " --certfile ../goDASH/godash/http/certs/cert.pem"\
-                        " --keyfile ../goDASH/godash/http/certs/key.pem"\
-                        " --bind www.goDASHbed.org:443"\
-                        " hypercorn_goDASHbed:app &")
+                            "hypercorn"
+                            " --certfile ../goDASH/godash/http/certs/cert.pem"
+                            " --keyfile ../goDASH/godash/http/certs/key.pem"
+                            " --bind www.goDASHbed.org:443"
+                            " hypercorn_goDASHbed:app &")
                     else:
                         print("- TCP HTTP enabled...")
                         tt = serverHost.cmd(
-                            "hypercorn"\
-                            " --bind www.goDASHbed.org:80"\
+                            "hypercorn"
+                            " --bind www.goDASHbed.org:80"
                             " hypercorn_goDASHbed:app &")
 
             sleep(3)
@@ -572,7 +592,6 @@ def goDashBedNet():
             print("Load bw values from trace: " + trace_file)
             if ".csv" in trace_file:
                 bw_a = readCsvThr(trace_file)
-
 
             print("Setting fifo queueing discipline")
             getVersion = subprocess.Popen("bash tc_fifo.sh %s %d" % (
@@ -634,6 +653,9 @@ def goDashBedNet():
                 caddy_s1 = serverHost.popen("rm ./output/caddy_access.log")
             if args.transport_mode == "quic" and args.serverType == "WSGI":
                 Popen("pgrep -f example | xargs kill -9", shell=True).wait()
+            if args.collaborative == "on":
+                # lets stop consul
+                os.system("killall -9 consul")
 
 
 if __name__ == '__main__':
