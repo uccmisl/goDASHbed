@@ -199,7 +199,7 @@ def modify_dict(_dict, i, run, **params):
             fo.write(str("\""+args.collaborative+"\""))
         elif k == '"storeDash"':
             if args.collaborative == "on":
-                fo.write(str("\""+args.collaborative+"\""))
+                fo.write(str("\""+args.collaborative+"\","))
             else:
                 fo.write(str(v))
         elif k == "streamDuration":
