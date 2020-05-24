@@ -72,7 +72,7 @@ parser.add_argument('--delay',
                     dest="delay",
                     type=float,
                     help="Delay in milliseconds of bottleneck link",
-                    default=40)
+                    default=10)
 
 parser.add_argument('--numruns',
                     dest="numruns",
@@ -445,20 +445,20 @@ class TwoSwitchTopo(Topo):
         s1 = self.addSwitch('s1')
 
         # bottleneck link
-        self.addLink('s1', 's0', bw=100, delay=str(args.delay)+'ms')
+        self.addLink('s1', 's0', bw=1000, delay=str(args.delay)+'ms')
 
         # add link between server and switch
-        self.addLink('h1', 's1', bw=100)
+        self.addLink('h1', 's1', bw=1000, delay='5ms')
 
         if args.collaborative == "on":
             s2 = self.addSwitch('s2')
             # add links for consul
-            self.addLink('c1', 's2', bw=100, delay='10ms')
-            self.addLink('s2', 's0', bw=100, delay='10ms')
+            self.addLink('c1', 's2', bw=1000, delay='5ms')
+            self.addLink('s2', 's0', bw=1000, delay='5ms')
 
         # add links between hosts and a switch s1
         for i in range(total_num_hosts-1):
-            self.addLink('h%d' % (i+2), 's0', bw=100, delay='10ms')
+            self.addLink('h%d' % (i+2), 's0', bw=1000, delay='5ms')
 
 
 def goDashBedNet():
@@ -610,7 +610,7 @@ def goDashBedNet():
                     "s1-eth1", args.bw_net), shell=True, stdout=subprocess.PIPE).stdout
             for intf in s0.intfList()[2:]:
                 getVersion2 = subprocess.Popen("bash tc_delay.sh %s %d" % (
-                    intf.name, args.delay), shell=True, stdout=subprocess.PIPE).stdout
+                    intf.name, 10), shell=True, stdout=subprocess.PIPE).stdout
             sleep(5)
 
             # create a folder based on date and time for each run
