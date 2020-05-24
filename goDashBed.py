@@ -190,13 +190,13 @@ def modify_dict(_dict, i, run, **params):
             _dict[k] = args.terminalPrint
         elif k == "debug":
             _dict[k] = args.debug
-        elif k == '"serveraddr"':
-            fo.write(str("\""+args.collaborative+"\""))
-        elif k == '"storeDash"':
+        elif k == "serveraddr":
+            _dict[k] = args.collaborative
+        elif k == "storeDash":
             if args.collaborative == "on":
-                fo.write(str("\""+args.collaborative+"\","))
+                _dict[k] = args.collaborative
             else:
-                fo.write(str(v))
+                _dict[k] = str(v)
         elif k == "streamDuration":
             _dict[k] = int(args.duration)
         elif k == "quic":
@@ -438,14 +438,14 @@ class TwoSwitchTopo(Topo):
 
         # create client nodes for video, web and voip
         for i in range(total_num_hosts-1):
-            self.addHost('h%d' % (i+2), ip='10.0.0.%d/8' % (i+2))
+            self.addHost('h%d' % (i+2), ip='10.0.0.%d/8' % (i+3))
 
         # Create two switches
         s0 = self.addSwitch('s0')
         s1 = self.addSwitch('s1')
 
         # bottleneck link
-        self.addLink('s1', 's0', bw=100)
+        self.addLink('s1', 's0', bw=100, delay=str(args.delay)+'ms')
 
         # add link between server and switch
         self.addLink('h1', 's1', bw=100)
@@ -454,11 +454,11 @@ class TwoSwitchTopo(Topo):
             s2 = self.addSwitch('s2')
             # add links for consul
             self.addLink('c1', 's2', bw=100, delay='10ms')
-            self.addLink('s2', 's0', bw=100)
+            self.addLink('s2', 's0', bw=100, delay='10ms')
 
         # add links between hosts and a switch s1
         for i in range(total_num_hosts-1):
-            self.addLink('h%d' % (i+2), 's0', bw=100)
+            self.addLink('h%d' % (i+2), 's0', bw=100, delay='10ms')
 
 
 def goDashBedNet():
