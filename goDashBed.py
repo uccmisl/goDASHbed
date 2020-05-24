@@ -140,11 +140,6 @@ urls = full_url_list+main_url_list+live_url_list + \
     full_byte_range_url_list+main_byte_range_url_list
 
 # get all the possible DASH MPD files from the H264 UHD dataset
-if args.collaborative == "on":
-    # lets start consul
-    os.system("consul agent -dev &")
-    # lets sleep until consul is set up
-    sleep(5)
 
 
 def clean_up(voip_host):
