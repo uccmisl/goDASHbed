@@ -1,4 +1,4 @@
-from quart import make_response, Quart, render_template, url_for, request, send_file, abort
+from quart import make_response, Quart, render_template, url_for, request, send_file, abort, make_push_promise
 from os import path
 from hypercorn.middleware import HTTPToHTTPSRedirectMiddleware
 
@@ -6,6 +6,27 @@ dash_content_path='/var/www/html/'
 
 # this 'root_path' is needed by Quart to point to the DASH video content folder
 app = Quart(__name__, root_path=dash_content_path)
+
+# async def app(scope, receive, send):
+#     if scope["type"] != "http":
+#         raise Exception("Only the HTTP protocol is supported")
+#
+#     await send({
+#         'type': 'http.response.start',
+#         'status': 200,
+#         'headers': [
+#             (b'content-type', b'text/plain'),
+#             (b'content-length', b'5'),
+#         ],
+#     })
+#     await send({
+#         'type': 'http.response.body',
+#         'body': b'hello',
+#     })
+
+# @app.route('/<path:path_to_DASH_files>')
+async def index():
+    return await render_template("index.html")
 
 # return 404, if file not found
 @app.errorhandler(404)

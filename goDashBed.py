@@ -173,7 +173,9 @@ def create_dict(config_file):
 
 def modify_dict(_dict, i, run, **params):
     for k, v in _dict.items():
-        if k == "storeDash":
+        # changed for godashbed v2
+        # if k == "storeDash":
+        if k == "outputFolder":
             _dict[k] = params["client_name"]
         elif k == "logFile":
             _dict[k] = str(str(v)[:8]+"_client"+str(i))
@@ -526,8 +528,8 @@ def goDashBedNet():
                 if args.transport_mode == "quic":
                     print("- QUIC is currently not enabled...")
                     print("For ASGI, please select --tm \"tcp\"\n")
-                    clean_up(voip_host)
-                    sys.exit(0)
+                    # clean_up(voip_host)
+                    # sys.exit(0)
                     # tt = serverHost.cmd(
                     #     "hypercorn"\
                     #     " --certfile ../goDASH/godash/http/certs/cert.pem"\
@@ -604,7 +606,7 @@ def goDashBedNet():
             processes = start_video_clients(args.videoclients, test_dict['adapt'], net, run, num_clients=total_num_hosts,
                                             output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
 
-            #CLI(net)
+            # CLI(net)
 
             # lets start throttling the link
             tl = ThrottleLink()
