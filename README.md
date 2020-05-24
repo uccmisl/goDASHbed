@@ -21,7 +21,7 @@ Requirements:
  - [D-ITG](www.grid.unina.it/software/ITG//download.php)
 
 ## Legacy
-Version 2.0 of goDASHbed is a major write of the code, and versions of goDASHbed from version 2.0 onwards only work with versions of godash from  version 2.0 onwards.  If you are using a  version 1 release of godash, please use a version 1 release of goDASHbed.  
+Version 2.0 of goDASHbed is a major write of the code, and versions of goDASHbed from version 2.0 onwards only work with versions of godash from  version 2.0 onwards.  If you are using a  version 1 release of godash, please use a version 1 release of goDASHbed.
 
 --------------------------------------------------------
 
