@@ -1,6 +1,6 @@
 # goDashbed Application
 
-Current release version : 1.1.7
+Current release version : 2.0
 
 We kindly ask that should you mention godash or goDASHbed, or use our code, in your publication, that you would reference the following paper:
 
@@ -13,11 +13,15 @@ GoDASHbed is a highly customizable framework for realistic large scale experimen
     -- Video: HTTP Adaptive Streaming traffic with support for two transportation modes TCP and QUIC
     -- VoIP: Realistic VoIP traffic generation (through D-ITG traffic generator[1])
 
+In collaboration with [godash](https://github.com/uccmisl/godash.git), goDASHbed provides a framework for HAS video analysis.
 
 Requirements:
  - [Mininet](http://mininet.org/)
- - [godash](https://github.com/uccmisl/godash.git)
+ - [godash](https://github.com/uccmisl/godash.git) Version 2.0 or later
  - [D-ITG](www.grid.unina.it/software/ITG//download.php)
+
+## Legacy
+Version 2.0 of goDASHbed is a major write of the code, and versions of goDASHbed from version 2.0 onwards only work with versions of godash from  version 2.0 onwards.  If you are using an older version of godash, please use a version 1 release of goDASHbed.  
 
 --------------------------------------------------------
 
@@ -68,7 +72,7 @@ Easiest way to find this location, is to open the folder that you added `godash`
 ```
 ./goDASHbed --help
 ```
-Flags for goDASH:
+Flags for goDASHbed:
 ```
   -h, --help            Show this help message and exit
   --bw-net, -b          Bandwidth of bottleneck link - required parameter
