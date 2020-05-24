@@ -530,7 +530,7 @@ def goDashBedNet():
                 #consul.cmd("consul -force-leave")
                 print("starting consul")
                 ttt = consul.cmd(
-                    "consul agent -dev -client 10.0.0.2 > /tmp/date.out &")
+                    "consul agent -dev -client 10.0.0.2 > ./output/consul_log.out &")
                 sleep(5)
 
             # stop the apache server
