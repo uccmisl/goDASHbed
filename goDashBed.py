@@ -390,6 +390,7 @@ def start_video_clients(num_video, algorithm, net, run, **params):
             str(run)+params["current_folder"]+config_folder_name+client_config
 
         # print(cmd)
+        sleep(2)
 
         temp_host.cmd(cmd + " &")
         processes.append(temp_host)
