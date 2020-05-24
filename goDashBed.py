@@ -438,6 +438,8 @@ class TwoSwitchTopo(Topo):
     def build(self, total_num_hosts=5):
         # creating server node
         serverHost = self.addHost('h1', ip='10.0.0.1/8')
+        if args.collaborative == "on":
+            consulHost = self.addHost('c1', ip='10.0.0.2/8')
 
         # create client nodes for video, web and voip
         for i in range(total_num_hosts-1):
@@ -452,6 +454,12 @@ class TwoSwitchTopo(Topo):
 
         # add link between server and switch
         self.addLink('h1', 's1', bw=100)
+
+        if args.collaborative == "on":
+            s2 = self.addSwitch('s2')
+            # add links for consul
+            self.addLink('c1', 's2', bw=100, delay='10ms')
+            self.addLink('s2', 's0', bw=100)
 
         # add links between hosts and a switch s1
         for i in range(total_num_hosts-1):
@@ -520,6 +528,15 @@ def goDashBedNet():
             serverHost = net.getNodeByName('h1')
             ip_address_sh = serverHost.cmdPrint(
                 "ifconfig %s-eth0 | grep inet | awk '{print $2}' | sed 's/addr://'" % serverHost.name).split()[0]
+
+            # start consul
+            if args.collaborative == "on":
+                consul = net.getNodeByName('c1')
+                #consul.cmd("consul -force-leave")
+                print("starting consul")
+                ttt = consul.cmd(
+                    "consul agent -dev -client 10.0.0.2 > /tmp/date.out &")
+                sleep(5)
 
             # stop the apache server
             tt4 = serverHost.cmd("sudo systemctl stop apache2.service")
