@@ -87,16 +87,17 @@ Flags for goDASHbed:
   --debug               Print output of goDASH to the log file (default 'on')
   --terminalPrint       Print output of goDASH to the terminal screen (default 'on')
   --server              Choice of Web server - WSGI (Caddy - TCP/QUIC) or ASGI (Hypercorn - currently only TCP)
+  --collaborative       Run the evaluation in collaborative mode, and share content between the clients (based only on client requests)
 ```
 --------------------------------------------------------
 
 ## Examples to launch the app :
-run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with no debug or terminal print outs, once for each trace in the 'traces' folder, using TCP as the transport mode and the ASGI Hypercorn/Quart Server
+run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with no debug or terminal print outs, once for each trace in the 'traces' folder, using TCP as the transport mode and the ASGI Hypercorn/Quart Server, without collaborative streaming
 ```
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off" --server "ASGI"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off" --server "ASGI" --collaborative "off"
 ```
 
-run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with debug or terminal print outs, once for each trace in the 'traces' folder, using QUIC as the transport mode and the WSGI Caddy Server
+run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with debug or terminal print outs, once for each trace in the 'traces' folder, using QUIC as the transport mode and the WSGI Caddy Server, with collaborative streaming
 ```
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on" --server "WSGI"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on" --server "WSGI"  --collaborative "on"
 ```
