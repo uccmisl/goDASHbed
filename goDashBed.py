@@ -559,17 +559,17 @@ def goDashBedNet():
                 tt1 = serverHost.cmd(
                     "sudo setcap CAP_NET_BIND_SERVICE=+eip hypercorn")
                 if args.transport_mode == "quic":
-                    print("- QUIC is currently not enabled...")
-                    print("For ASGI, please select --tm \"tcp\"\n")
+                    print("- QUIC enabled...")
+                    # print("For ASGI, please select --tm \"tcp\"\n")
                     # clean_up(voip_host)
                     # sys.exit(0)
-                    # tt = serverHost.cmd(
-                    #     "hypercorn"\
-                    #     " --certfile ../goDASH/godash/http/certs/cert.pem"\
-                    #     " --keyfile ../goDASH/godash/http/certs/key.pem"\
-                    #     " --quic-bind www.goDASHbed.org:444"\
-                    #     # " --bind www.goDASHbed.org:443"\
-                    #     " hypercorn_goDASHbed:app &")
+                    tt = serverHost.cmd(
+                        "hypercorn"
+                        " --quic-bind www.goDASHbed.org:443"\
+                        # " --bind www.goDASHbed.org:443"\
+                        # " --certfile ../goDASH/godash/http/certs/cert.pem"\
+                        # " --keyfile ../goDASH/godash/http/certs/key.pem"\
+                        " hypercorn_goDASHbed:app &")
                 elif args.transport_mode == "tcp":
                     # this permits http to https redirection - if we need it
                     # tt = serverHost.cmd(
@@ -585,8 +585,8 @@ def goDashBedNet():
                         print("- TCP HTTPS enabled...")
                         tt = serverHost.cmd(
                             "hypercorn"
-                            " --certfile ../goDASH/godash/http/certs/cert.pem"
-                            " --keyfile ../goDASH/godash/http/certs/key.pem"
+                            # " --certfile ../goDASH/godash/http/certs/cert.pem"
+                            # " --keyfile ../goDASH/godash/http/certs/key.pem"
                             " --bind www.goDASHbed.org:443"
                             " hypercorn_goDASHbed:app &")
                     else:

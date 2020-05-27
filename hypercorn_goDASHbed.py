@@ -1,65 +1,54 @@
-from quart import make_response, Quart, render_template, url_for, request, send_file, abort, make_push_promise
+from functools import partial
+import trio
+from hypercorn.trio import serve
+from hypercorn.config import Config
+from quart import send_from_directory
+from quart_trio import QuartTrio
 from os import path
-from hypercorn.middleware import HTTPToHTTPSRedirectMiddleware
 
-dash_content_path='/var/www/html/'
+# this defines the root folder containing our DASH dataset
+dash_content_path = '/var/www/html/'
 
-# this 'root_path' is needed by Quart to point to the DASH video content folder
-app = Quart(__name__, root_path=dash_content_path)
+# define the config setup for our testbed
+config = Config()
+# config.quic_bind = ["10.0.0.1:443"]  # port number to use for HTTP
+# config.bind = ["10.0.0.1:4444"]  # port number to use for HTTPS
+# config.insecure_bind = ["100.168.1.15:2222"]  # port number to use for QUIC
 
-# async def app(scope, receive, send):
-#     if scope["type"] != "http":
-#         raise Exception("Only the HTTP protocol is supported")
-#
-#     await send({
-#         'type': 'http.response.start',
-#         'status': 200,
-#         'headers': [
-#             (b'content-type', b'text/plain'),
-#             (b'content-length', b'5'),
-#         ],
-#     })
-#     await send({
-#         'type': 'http.response.body',
-#         'body': b'hello',
-#     })
+# locations for the cert and key
+config.certfile = "../goDASH/godash/http/certs/cert.pem"
+config.keyfile = "../goDASH/godash/http/certs/key.pem"
 
-# @app.route('/<path:path_to_DASH_files>')
-async def index():
-    return await render_template("index.html")
+# this 'root_path' is needed by QuartTrio to point to the DASH video content folder
+app = QuartTrio(__name__, root_path=dash_content_path)
 
 # return 404, if file not found
 @app.errorhandler(404)
 # @app.route('/')
 async def page_not_found(error):
-    print(error)
     return ' File not found', 404
-    # return await render_template('/404.html', title = '404'), 404
 
+# this return index.html if nothing is added to the url and port
+@app.route('/')
+async def root():
+
+    print("returning index.html",)
+    return await send_from_directory(dash_content_path, 'index.html'), 200
+
+
+# this return a file if a path is added after the url and port
 @app.route('/<path:path_to_DASH_files>')
-async def index(path_to_DASH_files):
-
-    # path to this file
-    path_to_file = path.join(dash_content_path, path_to_DASH_files)
+async def index(path_to_DASH_files=dash_content_path):
 
     # if the file does not exist, return 404
+    path_to_file = path.join(dash_content_path, path_to_DASH_files)
     if not path.isfile(path_to_file):
         print("This file does not exist:", path.isfile(path_to_file))
-        return path_to_file +' : File not found', 404
-        # abort(404, path_to_file)
+        return path_to_file + ' : File not found', 404
 
     # we need the await or we get coroutine error
-    # return await send_file(path_to_file, as_attachment=True)
     print("File downloaded", path_to_file)
-    return await send_file(path_to_file), 200
+    return await send_from_directory(dash_content_path, path_to_DASH_files), 200
 
-# for http/https redirection
-redirected_app = HTTPToHTTPSRedirectMiddleware(app, "www.goDASHbed.org")
-
-# this option
-#return await render_template('index.html')
-
-# and this option, seem to be the same
-# result = await render_template('index.html')
-# response = await make_response(result)
-# return response
+# use trio to get our files
+trio.run(partial(serve, app, config))
