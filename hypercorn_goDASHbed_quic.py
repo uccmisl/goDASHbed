@@ -11,6 +11,7 @@ dash_content_path = '/var/www/html/'
 
 # define the config setup for our testbed
 config = Config()
+config.quic_bind = ["10.0.0.1:4444"]  # port number to use for HTTP
 config.bind = ["10.0.0.1:443"]  # port number to use for HTTPS
 config.insecure_bind = ["10.0.0.1:80"]  # port number to use for QUIC
 

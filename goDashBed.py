@@ -565,11 +565,7 @@ def goDashBedNet():
                     # sys.exit(0)
                     tt = serverHost.cmd(
                         "hypercorn"
-                        " --quic-bind www.goDASHbed.org:443"\
-                        # " --bind www.goDASHbed.org:443"\
-                        # " --certfile ../goDASH/godash/http/certs/cert.pem"\
-                        # " --keyfile ../goDASH/godash/http/certs/key.pem"\
-                        " hypercorn_goDASHbed:app &")
+                        " hypercorn_goDASHbed_quic:app &")
                 elif args.transport_mode == "tcp":
                     # this permits http to https redirection - if we need it
                     # tt = serverHost.cmd(
@@ -587,13 +583,13 @@ def goDashBedNet():
                             "hypercorn"
                             # " --certfile ../goDASH/godash/http/certs/cert.pem"
                             # " --keyfile ../goDASH/godash/http/certs/key.pem"
-                            " --bind www.goDASHbed.org:443"
+                            # " --bind www.goDASHbed.org:443"
                             " hypercorn_goDASHbed:app &")
                     else:
                         print("- TCP HTTP enabled...")
                         tt = serverHost.cmd(
                             "hypercorn"
-                            " --bind www.goDASHbed.org:80"
+                            # " --bind www.goDASHbed.org:80"
                             " hypercorn_goDASHbed:app &")
 
             sleep(3)
