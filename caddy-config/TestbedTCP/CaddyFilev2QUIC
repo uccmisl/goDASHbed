@@ -3,7 +3,7 @@
 	experimental_http3
 }
 
-www.godashbed.org:443 {
+www.godashbed.org:4444 {
     tls <godash folder location>/goDASH/godash/http/certs/cert.pem <godash folder location>/goDASH/godash/http/certs/key.pem
   	encode gzip
   	root * /var/www/html
