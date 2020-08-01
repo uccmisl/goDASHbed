@@ -28,7 +28,7 @@ Version 2.0 of goDASHbed is a major write of the code, and versions of goDASHbed
 --------------------------------------------------------
 
 ## Install Steps
-The easiest way to install goDASHbed is to use the install script available at the UCC Mobile and Internet System Lab [MISL](http://cs1dev.ucc.ie/misl/goDASH/)
+The easiest way to install goDASHbed is to use the install script available at the UCC Mobile and Internet System Lab [MISL](http://cs1dev.ucc.ie/misl/godash2.0)
 
 After goDASHbed has been installed, follow these steps for all required dependencies
 
