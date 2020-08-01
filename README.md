@@ -43,17 +43,15 @@ sudo adduser $USER www-data
 sudo chown $USER:www-data -R /var/www
 sudo chmod u=rwX,g=srX,o=rX -R /var/www
 ```
-update the url lists in `urls/mpdURL.py` to reflect the content downloaded
+update the url lists in `urls/mpdURL.py` and in `urls/mpdURLquic.py` to reflect the content downloaded
 ```
 /var/www/html/<folder> -> "http://www.godashbed.org/<folder>"
 ```
 You may also need to update the `configure.json` file in goDASHbed/config, and change url to point to the content downloaded
 
-The clients will randomly choose one URL from the `urls/mpdURL.py` file.
+The clients will randomly choose one URL from the `urls/mpdURL.py` or `urls/mpdURLquic.py` file (depending on TCP/QUIC).
 
 if using tcp with https - change http to https in the configure.json file
-if using QUIC - change http to https in the configure.json file
-
 
 If you did not use the install script:
 to use HTTPS in goDASHbed, you need to modify the following files:
