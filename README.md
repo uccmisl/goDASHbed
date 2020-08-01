@@ -103,7 +103,3 @@ run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP 
 ```
 sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on" --server "WSGI"  --collaborative "on"
 ```
-
-if using QUIC, please add the port number 4444 to mpdURL.py
-
-"https://www.godashbed.org:4444/4K_dataset/4_sec/x264/bbb/DASH_Files/full/bbb_enc_x264_dash.mpd"

@@ -8,3 +8,4 @@ urls/**
 caddy-config/TestbedTCP/**
 access.log
 __pycache__
+*.DS_Store

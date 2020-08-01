@@ -23,7 +23,9 @@ References:
 1. Alessio Botta, Alberto Dainotti, and Antonio Pescap;. 2012. A tool for the generation of realistic network workload for emerging networking scenarios. Comput. Netw. (October 2012)
 
 example call to goDashBed.py
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off"  --server "WSGI"  --collaborative "on"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on" --server "WSGI"  --collaborative "on"
+
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off" --server "ASGI" --collaborative "off"
 '''
 
 
@@ -51,6 +53,7 @@ from os import listdir
 from os.path import isfile, join
 import datetime
 from urls.mpdURL import *
+from urls.mpdURLquic import *
 from random import randint
 import io
 import json
@@ -136,7 +139,12 @@ config_folder_name = "/config"
 log_folder_name = "/files"
 
 # get all the possible DASH MPD files from the H264 UHD dataset
-urls = full_url_list+main_url_list+live_url_list + \
+# set the port number of the server based on the transport portocol
+if args.transport_mode == "quic":
+    urls = full_url_list_quic+main_url_list_quic+live_url_list_quic + \
+        full_byte_range_url_list_quic+main_byte_range_url_list_quic
+else:
+    urls = full_url_list+main_url_list+live_url_list + \
     full_byte_range_url_list+main_byte_range_url_list
 
 # get all the possible DASH MPD files from the H264 UHD dataset
