@@ -393,7 +393,7 @@ def start_video_clients(num_video, algorithm, net, run, **params):
         # lets call each client from within its output folder
         temp_host.cmd("cd " + log_folder+"../../")
 
-        cmd = params["cwd"]+"/../goDASH/godash/godash --config " + \
+        cmd = params["cwd"]+"/../godash/godash/godash --config " + \
             params["output_folder"]+"/R" + \
             str(run)+params["current_folder"]+config_folder_name+client_config
 
