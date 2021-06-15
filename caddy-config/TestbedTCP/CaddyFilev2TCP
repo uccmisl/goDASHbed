@@ -1,5 +1,5 @@
 www.godashbed.org:443 {
- 	tls <godash folder location>/goDASH/godash/http/certs/cert.pem <godash folder location>/goDASH/godash/http/certs/key.pem
+ 	tls <godash folder location>/godash/godash/http/certs/cert.pem <godash folder location>/godash/godash/http/certs/key.pem
   	encode gzip
   	root * /var/www/html
   	file_server

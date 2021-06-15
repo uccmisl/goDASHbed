@@ -16,8 +16,8 @@ config.bind = ["10.0.0.1:443"]  # port number to use for HTTPS
 config.insecure_bind = ["10.0.0.1:80"]  # port number to use for QUIC
 
 # locations for the cert and key
-config.certfile = "../goDASH/godash/http/certs/cert.pem"
-config.keyfile = "../goDASH/godash/http/certs/key.pem"
+config.certfile = "../godash/godash/http/certs/cert.pem"
+config.keyfile = "../godash/godash/http/certs/key.pem"
 
 # this 'root_path' is needed by QuartTrio to point to the DASH video content folder
 app = QuartTrio(__name__, root_path=dash_content_path)
