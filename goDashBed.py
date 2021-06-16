@@ -14,7 +14,7 @@ Highly customizable framework for realistic large scale experimentation with two
 
 Requirements:
  - Mininet (http://mininet.org/)
- - goDash (https://github.com/uccmisl/goDASH.git)
+ - goDash (https://github.com/jq5/godash-MISL-SOC-21.git)
  - D-ITG (www.grid.unina.it/software/ITG//download.php)
 
 
@@ -23,9 +23,11 @@ References:
 1. Alessio Botta, Alberto Dainotti, and Antonio Pescap;. 2012. A tool for the generation of realistic network workload for emerging networking scenarios. Comput. Netw. (October 2012)
 
 example call to goDashBed.py
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on" --server "WSGI"  --collaborative "on"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on" --server "WSGI"  --collaborative "on" --cli "off"
 
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off" --server "ASGI" --collaborative "off"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off" --server "ASGI" --collaborative "off" --cli "off"
+
+--cli "on" - turns on mininet command line interface and stops webservers from running - permitting the user to run the server and clients via terminal windows in mininet.
 '''
 
 
@@ -125,6 +127,11 @@ parser.add_argument('--server',
 parser.add_argument('--collaborative',
                     dest="collaborative",
                     help="run network in collaborative mode",
+                    default="off")
+
+parser.add_argument('--cli',
+                    dest="cliBoolean",
+                    help="stop mininet and enter cli (command line interface)",
                     default="off")
 
 # Expt parameters
@@ -549,56 +556,63 @@ def goDashBedNet():
             if args.serverType == "WSGI":
                 print("Calling WSGI Server...", end=" ")
                 if args.transport_mode == "quic":
-                    print("- QUIC enabled...")
                     tt = serverHost.cmd(
                         "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
-                    tt2 = serverHost.cmd(
-                        'caddy start --config ./caddy-config/TestbedTCP/CaddyFilev2QUIC --adapter caddyfile')
+                    if args.cliBoolean == "off":
+                        print("- QUIC enabled...")
+                        tt2 = serverHost.cmd(
+                            'caddy start --config ' +
+                            './caddy-config/TestbedTCP/CaddyFilev2QUIC ' +
+                            '--adapter caddyfile')
 
                 elif args.transport_mode == "tcp":
-                    print("- TCP HTTPS enabled...")
                     tt = serverHost.cmd(
                         "sudo setcap CAP_NET_BIND_SERVICE=+eip caddy")
-                    tt2 = serverHost.cmd(
-                        'caddy start --config ./caddy-config/TestbedTCP/CaddyFilev2TCP --adapter caddyfile')
+                    if args.cliBoolean == "off":
+                        print("- TCP HTTPS enabled...")
+                        tt2 = serverHost.cmd(
+                            'caddy start --config ' +
+                            './caddy-config/TestbedTCP/CaddyFilev2TCP ' +
+                            '--adapter caddyfile')
 
             elif args.serverType == "ASGI":
                 print("Calling Hypercorn ASGI Server...", end=" ")
                 tt1 = serverHost.cmd(
                     "sudo setcap CAP_NET_BIND_SERVICE=+eip hypercorn")
-                if args.transport_mode == "quic":
-                    print("- QUIC enabled...")
-                    # print("For ASGI, please select --tm \"tcp\"\n")
-                    # clean_up(voip_host)
-                    # sys.exit(0)
-                    tt = serverHost.cmd(
-                        "hypercorn"
-                        " hypercorn_goDASHbed_quic:app &")
-                elif args.transport_mode == "tcp":
-                    # this permits http to https redirection - if we need it
-                    # tt = serverHost.cmd(
-                    #     "hypercorn"\
-                    # " --certfile ../goDASH/godash/http/certs/cert.pem"\
-                    # " --keyfile ../goDASH/godash/http/certs/key.pem"\
-                    # " --bind www.goDASHbed.org:443"\
-                    # " --insecure-bind www.goDASHbed.org:80"\
-                    # " hypercorn_goDASHbed:redirected_app &")
+                if args.cliBoolean == "off":
+                    if args.transport_mode == "quic":
+                        print("- QUIC enabled...")
+                        # print("For ASGI, please select --tm \"tcp\"\n")
+                        # clean_up(voip_host)
+                        # sys.exit(0)
+                        tt = serverHost.cmd(
+                            "hypercorn"
+                            " hypercorn_goDASHbed_quic:app &")
+                    elif args.transport_mode == "tcp":
+                        # this permits http to https redirection - if we need it
+                        # tt = serverHost.cmd(
+                        #     "hypercorn"\
+                        # " --certfile ../goDASH/godash/http/certs/cert.pem"\
+                        # " --keyfile ../goDASH/godash/http/certs/key.pem"\
+                        # " --bind www.goDASHbed.org:443"\
+                        # " --insecure-bind www.goDASHbed.org:80"\
+                        # " hypercorn_goDASHbed:redirected_app &")
 
-                    # lets do this dependent on the structure of the input urls
-                    if "https" in urls[0]:
-                        print("- TCP HTTPS enabled...")
-                        tt = serverHost.cmd(
-                            "hypercorn"
-                            # " --certfile ../goDASH/godash/http/certs/cert.pem"
-                            # " --keyfile ../goDASH/godash/http/certs/key.pem"
-                            # " --bind www.goDASHbed.org:443"
-                            " hypercorn_goDASHbed:app &")
-                    else:
-                        print("- TCP HTTP enabled...")
-                        tt = serverHost.cmd(
-                            "hypercorn"
-                            # " --bind www.goDASHbed.org:80"
-                            " hypercorn_goDASHbed:app &")
+                        # lets do this dependent on the structure of the input urls
+                        if "https" in urls[0]:
+                            print("- TCP HTTPS enabled...")
+                            tt = serverHost.cmd(
+                                "hypercorn"
+                                # " --certfile ../goDASH/godash/http/certs/cert.pem"
+                                # " --keyfile ../goDASH/godash/http/certs/key.pem"
+                                # " --bind www.goDASHbed.org:443"
+                                " hypercorn_goDASHbed:app &")
+                        else:
+                            print("- TCP HTTP enabled...")
+                            tt = serverHost.cmd(
+                                "hypercorn"
+                                # " --bind www.goDASHbed.org:80"
+                                " hypercorn_goDASHbed:app &")
 
             sleep(3)
 
@@ -642,7 +656,8 @@ def goDashBedNet():
             processes = start_video_clients(args.videoclients, test_dict['adapt'], net, run, num_clients=total_num_hosts,
                                             output_folder=output_folder, current_folder=current_folder, config_folder=config_folder, dic=test_dict, cwd=cwd)
 
-            # CLI(net)
+            if args.cliBoolean == "on":
+                CLI(net)
 
             # lets start throttling the link
             tl = ThrottleLink()

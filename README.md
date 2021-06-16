@@ -88,16 +88,17 @@ Flags for goDASHbed:
   --terminalPrint       Print output of goDASH to the terminal screen (default 'on')
   --server              Choice of Web server - WSGI (Caddy - TCP/QUIC) or ASGI (Hypercorn - TCP/QUIC)
   --collaborative       Run the evaluation in collaborative mode, and share content between the clients (based only on client requests)
+  --cli                 Turns on mininet command line interface and stops web-servers from running - permitting the user to run the server and clients via terminal windows directly in mininet (default 'off')
 ```
 --------------------------------------------------------
 
 ## Examples to launch the app :
 run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with no debug or terminal print outs, once for each trace in the 'traces' folder, using TCP as the transport mode and the ASGI Hypercorn/QuartTrio Server, without collaborative streaming
 ```
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off" --server "ASGI" --collaborative "off"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "off" --numruns 1 --tm "tcp" --terminalPrint "off" --server "ASGI" --collaborative "off" --cli "off"
 ```
 
 run godashbed on a 10Mbit link with 3 video clients for 40 seconds, with 1 VOIP client, with debug or terminal print outs, once for each trace in the 'traces' folder, using QUIC as the transport mode and the WSGI Caddy Server, with collaborative streaming
 ```
-sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on" --server "WSGI"  --collaborative "on"
+sudo python3 ./goDashBed.py -b 10 --videoclients 3 --duration 40 --voipclients 1 --debug "on" --numruns 1 --tm "quic" --terminalPrint "on" --server "WSGI"  --collaborative "on" --cli "off"
 ```
