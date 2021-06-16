@@ -1,6 +1,6 @@
 # goDashbed Application
 
-Current release version : 2.0.3 - updated for go 1.16.5 and http certs (SANS)
+Current release version : 2.0.4 - updated for go 1.16.5 and http certs (SANS)
 
 We kindly ask that should you mention [goDASH](https://github.com/uccmisl/godash) or [goDASHbed](https://github.com/uccmisl/godashbed), or use our code, in your publication, that you would reference the following papers:
 
