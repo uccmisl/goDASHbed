@@ -1,6 +1,10 @@
-# needed for experimental QUIC
+# needed for experimental QUIC - updated 16-06-2021
 {
-	experimental_http3
+	servers {
+		protocol {
+			experimental_http3
+		}
+	}
 }
 
 www.godashbed.org:4444 {
