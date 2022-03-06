@@ -1,6 +1,6 @@
 # goDashbed Application
 
-Current release version : 2.0.4 - updated for go 1.16.5 and http certs (SANS)
+Current release version : 2.0.5 - updated for goDASH and golang v1.17.8
 
 We kindly ask that should you mention [goDASH](https://github.com/uccmisl/godash) or [goDASHbed](https://github.com/uccmisl/godashbed), or use our code, in your publication, that you would reference the following papers:
 
@@ -8,6 +8,16 @@ D. Raca, M. Manifacier, and J.J. Quinlan.  goDASH - GO accelerated HAS framework
 
 John O’Sullivan, D. Raca, and Jason J. Quinlan.  Demo Paper: godash 2.0 - The Next Evolution of HAS Evaluation. 21st IEEE International Symposium On A World Of Wireless, Mobile And Multimedia Networks (IEEE WoWMoM 2020), Cork, Ireland. August 31 to September 03, 2020 [CORA](https://cora.ucc.ie/handle/10468/10145 "CORA")
 
+--------------------------------------------------------
+## Docker Containers
+
+With the release of version 2.0.5, we are also releasing amd64 docker containers for both [goDASH](https://hub.docker.com/r/jjq52021/godash) or [goDASHbed](https://hub.docker.com/r/jjq52021/godashbed).
+
+An arm64 version of [goDASH](https://hub.docker.com/r/jjq52021/godash_arm64) is also available.
+
+In the coming weeks we will also release a network build script, so as to permit a full evaluation of DASH algorithms and associated TCP and QUIC transport protocols within a Docker test framework.
+
+--------------------------------------------------------
 ## General Description
 
 GoDASHbed is a highly customizable framework for realistic large scale experimentation with two different types of supported traffic:
@@ -22,11 +32,10 @@ Requirements:
  - [godash](https://github.com/uccmisl/godash.git) Version 2.0 or later
  - [D-ITG](www.grid.unina.it/software/ITG//download.php)
 
-## Legacy
+### Legacy
 Version 2.0 of goDASHbed is a major write of the code, and versions of goDASHbed from version 2.0 onwards will only work with versions of godash from  version 2.0 onwards.  If you are using a  version 1 release of godash, please use a version 1 release of goDASHbed.
 
 --------------------------------------------------------
-
 ## Install Steps
 The easiest way to install goDASHbed is to use the install script available at the UCC Mobile and Internet System Lab [MISL](http://cs1dev.ucc.ie/misl/godash2.0)
 
@@ -66,7 +75,6 @@ add the folder location that you downloaded goDASH to.
 Easiest way to find this location, is to open the folder that you added `godash` to, then open a terminal, type `pwd` and the reply is the folder location.  Add this output text into the `CaddyfileCaddyFilev2TCP` and `CaddyFilev2QUIC` replacing `<godash folder location>` as shown above.
 
 --------------------------------------------------------
-
 ## Print help about parameters:
 
 ```
