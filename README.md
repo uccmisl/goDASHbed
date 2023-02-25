@@ -1,6 +1,6 @@
 # goDashbed Application
 
-Current release version : 2.0.5 - updated for goDASH to golang v1.17.8
+Current release version : 2.0.6 - updated for goDASHbed to golang 1.20+
 
 We kindly ask that should you mention [goDASH](https://github.com/uccmisl/godash) or [goDASHbed](https://github.com/uccmisl/godashbed), or use our code, in your publication, that you would reference the following papers:
 
@@ -15,7 +15,7 @@ With the release of version 2.0.5, we are also releasing amd64 docker containers
 
 An arm64 version of [goDASH](https://hub.docker.com/r/jjq52021/godash_arm64) is also available.
 
-In the coming weeks we will also release a network build script, so as to permit a full evaluation of DASH algorithms and associated TCP and QUIC transport protocols within a Docker test framework.
+In the coming weeks/months/years we will also release a network build script, so as to permit a full evaluation of DASH algorithms and associated TCP and QUIC transport protocols within a Docker test framework.
 
 --------------------------------------------------------
 ## General Description
@@ -28,12 +28,14 @@ GoDASHbed is a highly customizable framework for realistic large scale experimen
 In collaboration with [godash](https://github.com/uccmisl/godash.git), goDASHbed provides a framework for HAS video analysis.
 
 Requirements:
- - [Mininet](http://mininet.org/)
+ - [Mininet](http://mininet.org/) Does not work on M1 or M2 apple machine natively :(
  - [godash](https://github.com/uccmisl/godash.git) Version 2.0 or later
- - [D-ITG](www.grid.unina.it/software/ITG//download.php)
+ - [D-ITG](https://traffic.comics.unina.it/software/ITG/download.php)
+
+ To use the hypercorn webserver, you need to install trio, quart, quart_trio and hypercorn, type ```python3.10 -m pip install trio``` in terminal, replacing ```python3.10``` with the version of python3 you are using, and ```trio``` with the git repo you want to install.
 
 ### Legacy
-Version 2.0 of goDASHbed is a major write of the code, and versions of goDASHbed from version 2.0 onwards will only work with versions of godash from  version 2.0 onwards.  If you are using a  version 1 release of godash, please use a version 1 release of goDASHbed.
+Version 2.0 of `goDASHbed` is a major write of the code, and versions of `goDASHbed` from version 2.0 onwards will only work with versions of `godash` from  version 2.0 onwards.  If you are using a  version 1 release of `godash`, please use a version 1 release of `goDASHbed`.
 
 --------------------------------------------------------
 ## Install Steps

@@ -14,8 +14,8 @@ Highly customizable framework for realistic large scale experimentation with two
 
 Requirements:
  - Mininet (http://mininet.org/)
- - goDash (https://github.com/jq5/godash-MISL-SOC-21.git)
- - D-ITG (www.grid.unina.it/software/ITG//download.php)
+ - goDash (https://github.com/uccmisl/godash.git)
+ - D-ITG (https://traffic.comics.unina.it/software/ITG/download.php)
 
 
 References:
