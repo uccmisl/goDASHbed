@@ -1,6 +1,6 @@
 # goDashbed Application
 
-Current release version : 2.0.6 - updated for goDASHbed to golang 1.20+
+Current release version : 2.0.7 - updates for CADDY2
 
 We kindly ask that should you mention [goDASH](https://github.com/uccmisl/godash) or [goDASHbed](https://github.com/uccmisl/godashbed), or use our code, in your publication, that you would reference the following papers:
 
