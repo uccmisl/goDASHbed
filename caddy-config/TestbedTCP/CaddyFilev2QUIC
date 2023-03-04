@@ -1,11 +1,3 @@
-# needed for experimental QUIC - updated 16-06-2021
-{
-	servers {
-		protocol {
-			experimental_http3
-		}
-	}
-}
 
 www.godashbed.org:4444 {
     tls <godash folder location>/godash/godash/http/certs/cert.pem <godash folder location>/godash/godash/http/certs/key.pem
@@ -14,7 +6,7 @@ www.godashbed.org:4444 {
   	file_server
   	log {
 		output file         ./output/caddy_access.log
-		format single_field common_log
+		# format single_field common_log
 	}
 }
 

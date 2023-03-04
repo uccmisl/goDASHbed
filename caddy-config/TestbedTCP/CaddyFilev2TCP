@@ -1,3 +1,4 @@
+
 www.godashbed.org:443 {
  	tls <godash folder location>/godash/godash/http/certs/cert.pem <godash folder location>/godash/godash/http/certs/key.pem
   	encode gzip
@@ -5,6 +6,6 @@ www.godashbed.org:443 {
   	file_server
   	log {
 		output file         ./output/caddy_access.log
-		format single_field common_log
+		# format single_field common_log
 	}
 }
